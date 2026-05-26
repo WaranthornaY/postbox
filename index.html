@@ -341,7 +341,13 @@
     });
 
     document.getElementById('submit-btn').disabled = true;
-    document.getElementById('submit-btn').textContent = 'Sent — awaiting payment...';
+    document.getElementById('submit-btn').textContent = 'Redirecting to payment...';
+
+    // Redirect to payment page with all price data + peer ID in URL
+    const peerParam = params.get('peer') || '';
+    setTimeout(() => {
+      window.location.href = `payment.html?peer=${peerParam}&price=${price}&base=${BASE_RATE + regionFee}&wfee=${weightFee}&sfee=${sizeFee}`;
+    }, 600);
   }
 
   function showSuccess() {
