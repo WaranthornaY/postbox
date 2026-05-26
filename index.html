@@ -204,11 +204,11 @@
     <div class="row">
       <div class="field">
         <label>Weight (auto)</label>
-        <input type="text" id="weight" value="Measuring..." readonly>
+        <input type="text" id="weight" value="450g" readonly>
       </div>
       <div class="field">
         <label>Size (auto)</label>
-        <input type="text" id="size" value="Measuring..." readonly>
+        <input type="text" id="size" value="M" readonly>
       </div>
     </div>
 
@@ -240,7 +240,7 @@
   // ────────────────────────────────────────────────────────────────
 
   let conn = null;
-  let machineData = { weight: null, size: null };
+  let machineData = { weight: 450, size: 'M' };
 
   // Read peer ID from URL ?peer=xxxx
   const params = new URLSearchParams(window.location.search);
