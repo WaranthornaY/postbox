@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostBox — Send a Package</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', sans-serif;
+    background: #f4f2ed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+
+  .wordmark {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #999;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.07);
+  }
+
+  .conn-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; flex-shrink: 0; }
+  .dot.on { background: #2ecc71; box-shadow: 0 0 6px #2ecc7166; }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 24px;
+  }
+
+  .field { margin-bottom: 16px; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #111;
+    background: #fafafa;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: #111;
+    background: #fff;
+  }
+
+  input:read-only {
+    color: #888;
+    background: #f4f4f4;
+  }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .price-preview {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .price-preview.show { display: block; }
+  .price-label { font-size: 11px; color: #aaa; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .price-amount { font-size: 28px; font-weight: 700; color: #111; }
+  .price-amount small { font-size: 13px; font-weight: 400; color: #aaa; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s;
+  }
+  .submit-btn:hover { background: #333; }
+  .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  .success {
+    display: none;
+    text-align: center;
+    padding: 20px 0 8px;
+  }
+  .success.show { display: block; }
+  .success-icon { font-size: 40px; margin-bottom: 12px; }
+  .success h2 { font-size: 18px; color: #111; margin-bottom: 6px; }
+  .success p { font-size: 13px; color: #888; }
+
+  .notice {
+    font-size: 11px;
+    color: #bbb;
+    text-align: center;
+    margin-top: 16px;
+    max-width: 400px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wordmark">POSTBOX</div>
+
+<div class="card">
+  <div class="conn-bar">
+    <div class="dot" id="dot"></div>
+    <span id="conn-label">Connecting to machine...</span>
+  </div>
+
+  <div id="form-section">
+    <h1>Send a package</h1>
+    <p class="subtitle">Fill in the details below. Weight and size are measured automatically.</p>
+
+    <div class="field">
+      <label>Sender name</label>
+      <input type="text" id="sender" placeholder="Your full name">
+    </div>
+
+    <div class="field">
+      <label>Destination province</label>
+      <select id="province">
+        <option value="">— Select province —</option>
+        <optgroup label="North">
+          <option value="Chiang Mai|N">Chiang Mai</option>
+          <option value="Chiang Rai|N">Chiang Rai</option>
+          <option value="Lampang|N">Lampang</option>
+          <option value="Phrae|N">Phrae</option>
+          <option value="Nan|N">Nan</option>
+        </optgroup>
+        <optgroup label="Northeast">
+          <option value="Khon Kaen|NE">Khon Kaen</option>
+          <option value="Udon Thani|NE">Udon Thani</option>
+          <option value="Nakhon Ratchasima|NE">Nakhon Ratchasima</option>
+          <option value="Ubon Ratchathani|NE">Ubon Ratchathani</option>
+        </optgroup>
+        <optgroup label="Central">
+          <option value="Bangkok|C">Bangkok</option>
+          <option value="Nonthaburi|C">Nonthaburi</option>
+          <option value="Pathum Thani|C">Pathum Thani</option>
+          <option value="Ayutthaya|C">Ayutthaya</option>
+        </optgroup>
+        <optgroup label="East">
+          <option value="Chonburi|E">Chonburi</option>
+          <option value="Rayong|E">Rayong</option>
+          <option value="Chanthaburi|E">Chanthaburi</option>
+        </optgroup>
+        <optgroup label="South">
+          <option value="Phuket|S">Phuket</option>
+          <option value="Surat Thani|S">Surat Thani</option>
+          <option value="Hat Yai|S">Hat Yai</option>
+          <option value="Krabi|S">Krabi</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Weight (auto)</label>
+        <input type="text" id="weight" value="Measuring..." readonly>
+      </div>
+      <div class="field">
+        <label>Size (auto)</label>
+        <input type="text" id="size" value="Measuring..." readonly>
+      </div>
+    </div>
+
+    <div class="price-preview" id="price-preview">
+      <div class="price-label">ESTIMATED PRICE</div>
+      <div class="price-amount" id="price-amount">฿0 <small>THB</small></div>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()" disabled>
+      Submit &amp; get payment QR
+    </button>
+  </div>
+
+  <div class="success" id="success-section">
+    <div class="success-icon">&#10003;</div>
+    <h2>Package registered!</h2>
+    <p>The operator will confirm payment on their screen. Your package will be sorted automatically.</p>
+  </div>
+</div>
+
+<p class="notice">This form is connected to the PostBox machine. Your data is sent directly to the machine — not stored anywhere.</p>
+
+<script>
+  // ── PRICING CONFIG ───────────────────────────────────────────────
+  const BASE_RATE = 30;
+  const WEIGHT_RATE = 0.05;       // ฿ per gram
+  const SIZE_FEES = { S: 0, M: 20, L: 50, XL: 80 };
+  const REGION_FEES = { N: 20, NE: 20, C: 0, E: 10, S: 25 };
+  // ────────────────────────────────────────────────────────────────
+
+  let conn = null;
+  let machineData = { weight: null, size: null };
+
+  // Read peer ID from URL ?peer=xxxx
+  const params = new URLSearchParams(window.location.search);
+  const dashboardPeerID = params.get('peer');
+
+  if (!dashboardPeerID) {
+    document.getElementById('conn-label').textContent = 'No machine QR scanned — missing peer ID in URL';
+  } else {
+    const myPeer = new Peer();
+
+    myPeer.on('open', () => {
+      conn = myPeer.connect(dashboardPeerID);
+
+      conn.on('open', () => {
+        document.getElementById('dot').classList.add('on');
+        document.getElementById('conn-label').textContent = 'Connected to machine';
+        tryEnableSubmit();
+      });
+
+      conn.on('data', (data) => {
+        // Receive measurement data from machine
+        if (data.type === 'measurements') {
+          machineData.weight = data.weight;
+          machineData.size = data.size;
+          document.getElementById('weight').value = `${data.weight}g`;
+          document.getElementById('size').value = data.size;
+          updatePrice();
+          tryEnableSubmit();
+        }
+        if (data.type === 'purchase_confirmed') {
+          showSuccess();
+        }
+      });
+
+      conn.on('close', () => {
+        document.getElementById('dot').classList.remove('on');
+        document.getElementById('conn-label').textContent = 'Disconnected from machine';
+      });
+    });
+
+    myPeer.on('error', (err) => {
+      document.getElementById('conn-label').textContent = `Connection error: ${err.type}`;
+    });
+  }
+
+  document.getElementById('province').addEventListener('change', updatePrice);
+
+  function updatePrice() {
+    const provinceVal = document.getElementById('province').value;
+    if (!provinceVal || !machineData.weight) return;
+
+    const [, region] = provinceVal.split('|');
+    const weight = machineData.weight;
+    const size = machineData.size || 'S';
+
+    const weightFee = Math.round(weight * WEIGHT_RATE);
+    const sizeFee = SIZE_FEES[size] ?? 0;
+    const regionFee = REGION_FEES[region] ?? 0;
+    const total = BASE_RATE + weightFee + sizeFee + regionFee;
+
+    document.getElementById('price-amount').innerHTML = `฿${total} <small>THB</small>`;
+    document.getElementById('price-preview').classList.add('show');
+    tryEnableSubmit();
+  }
+
+  function tryEnableSubmit() {
+    const ready = conn &&
+      document.getElementById('sender').value.trim() &&
+      document.getElementById('province').value &&
+      machineData.weight;
+    document.getElementById('submit-btn').disabled = !ready;
+  }
+
+  document.getElementById('sender').addEventListener('input', tryEnableSubmit);
+  document.getElementById('province').addEventListener('change', tryEnableSubmit);
+
+  function submitForm() {
+    const provinceVal = document.getElementById('province').value;
+    const [province, region] = provinceVal.split('|');
+    const weight = machineData.weight;
+    const size = machineData.size || 'S';
+    const weightFee = Math.round(weight * WEIGHT_RATE);
+    const sizeFee = SIZE_FEES[size] ?? 0;
+    const regionFee = REGION_FEES[region] ?? 0;
+    const price = BASE_RATE + weightFee + sizeFee + regionFee;
+
+    conn.send({
+      type: 'form_submit',
+      sender: document.getElementById('sender').value.trim(),
+      province,
+      region,
+      weight,
+      size,
+      baseRate: BASE_RATE + regionFee,
+      weightFee,
+      sizeFee,
+      price,
+    });
+
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-btn').textContent = 'Sent — awaiting payment...';
+  }
+
+  function showSuccess() {
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('success-section').classList.add('show');
+  }
+</script>
+</body>
+</html>
