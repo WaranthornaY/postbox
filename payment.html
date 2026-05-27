@@ -427,16 +427,17 @@
 
     <!-- Amount -->
     <div class="amount-card">
-      <div class="amount-label">TOTAL AMOUNT</div>
+      <div class="amount-label" id="amount-label">TOTAL AMOUNT</div>
       <div>
         <span class="amount-value" id="display-price">—</span>
         <span class="amount-currency">THB</span>
       </div>
       <div class="amount-breakdown" id="breakdown">
-        <div class="breakdown-row"><span>Base rate</span><span id="b-base">—</span></div>
-        <div class="breakdown-row"><span>Weight fee</span><span id="b-weight">—</span></div>
-        <div class="breakdown-row"><span>Size fee</span><span id="b-size">—</span></div>
-        <div class="breakdown-row total"><span>Total</span><span id="b-total">—</span></div>
+        <div class="breakdown-row"><span id="b-base-label">Base rate</span><span id="b-base">—</span></div>
+        <div class="breakdown-row"><span id="b-wfee-label">Weight fee</span><span id="b-weight">—</span></div>
+        <div class="breakdown-row"><span id="b-sfee-label">Size fee</span><span id="b-size">—</span></div>
+        <div class="breakdown-row" id="delivery-row" style="display:none"><span id="delivery-label">Estimated delivery</span><span id="delivery-val" style="color:#1565c0;font-weight:700"></span></div>
+        <div class="breakdown-row total"><span id="b-total-label">Total</span><span id="b-total">—</span></div>
       </div>
     </div>
 
@@ -469,10 +470,10 @@
   <!-- Success -->
   <div id="success-view">
     <div class="success-circle">✓</div>
-    <div class="success-title">Payment Confirmed</div>
-    <div class="success-sub">Your package is being sorted now.<br>Please collect it from the correct bin.</div>
+    <div class="success-title" id="success-title">Payment Confirmed</div>
+    <div class="success-sub" id="success-sub">Your package is being sorted now.<br>Please collect it from the correct bin.</div>
     <div class="success-ref">Ref: <span id="ref-no">PB-000000</span></div>
-    <div style="font-size:13px;color:#94a3b8;font-weight:500">You may close this page.</div>
+    <div style="font-size:13px;color:#94a3b8;font-weight:500" id="success-close">You may close this page.</div>
   </div>
 
 </div>
@@ -494,11 +495,53 @@
   const wFee     = params.get('wfee')     || '—';
   const sFee     = params.get('sfee')     || '—';
 
+  const lang  = params.get('lang') || 'en';
+  const days  = params.get('days') || '';
+
+  const T = {
+    en: {
+      title: 'TOTAL AMOUNT', base: 'Base rate', wfee: 'Weight fee',
+      sfee: 'Size fee', total: 'Total', delivery: 'Estimated delivery',
+      deliveryPost: 'business days', pay: '✓  I have paid',
+      paying: 'Processing...', successTitle: 'Payment Confirmed',
+      successSub: 'Your package is being sorted now.\nPlease collect it from the correct bin.',
+      close: 'You may close this page.',
+    },
+    th: {
+      title: 'ยอดชำระทั้งหมด', base: 'ค่าบริการพื้นฐาน', wfee: 'ค่าน้ำหนัก',
+      sfee: 'ค่าขนาด', total: 'รวมทั้งหมด', delivery: 'ระยะเวลาจัดส่งโดยประมาณ',
+      deliveryPost: 'วันทำการ', pay: '✓  ชำระเงินแล้ว',
+      paying: 'กำลังดำเนินการ...', successTitle: 'ยืนยันการชำระเงินแล้ว',
+      successSub: 'พัสดุของคุณกำลังถูกจัดเรียง\nกรุณารับพัสดุที่ช่องที่ถูกต้อง',
+      close: 'คุณสามารถปิดหน้านี้ได้',
+    }
+  };
+  const t = T[lang] || T['en'];
+
   document.getElementById('display-price').textContent = price;
   document.getElementById('b-base').textContent   = baseRate !== '—' ? '฿' + baseRate : '—';
   document.getElementById('b-weight').textContent = wFee !== '—'     ? '฿' + wFee     : '—';
   document.getElementById('b-size').textContent   = sFee !== '—'     ? '฿' + sFee     : '—';
   document.getElementById('b-total').textContent  = price !== '—'    ? '฿' + price    : '—';
+
+  // Apply translations
+  document.getElementById('amount-label').textContent  = t.title;
+  document.getElementById('b-base-label').textContent  = t.base;
+  document.getElementById('b-wfee-label').textContent  = t.wfee;
+  document.getElementById('b-sfee-label').textContent  = t.sfee;
+  document.getElementById('b-total-label').textContent = t.total;
+  document.getElementById('btn-text').textContent      = t.pay;
+  document.getElementById('success-title').textContent = t.successTitle;
+  document.getElementById('success-sub').textContent   = t.successSub;
+  document.getElementById('success-close').textContent = t.close;
+
+  // Show delivery estimate
+  if (days) {
+    const el = document.getElementById('delivery-row');
+    el.style.display = 'flex';
+    document.getElementById('delivery-label').textContent = t.delivery;
+    document.getElementById('delivery-val').textContent   = days + ' ' + t.deliveryPost;
+  }
 
   // ── DRAW MOCK QR ─────────────────────────────────────────────────
   // Draws a realistic-looking QR pattern on canvas
