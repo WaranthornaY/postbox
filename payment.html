@@ -7,392 +7,65 @@
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Sarabun',sans-serif;background:#f5f7ff;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+  .bank-header{width:100%;background:linear-gradient(135deg,#1a237e,#1565c0,#1e88e5);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+  .bank-logo{display:flex;align-items:center;gap:10px;}
+  .bank-logo-icon{width:34px;height:34px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#1a237e;}
+  .bank-logo-name{color:#fff;font-size:14px;font-weight:800;line-height:1.1;}
+  .bank-logo-sub{color:rgba(255,255,255,0.6);font-size:9px;font-weight:500;letter-spacing:0.1em;}
+  .bank-secure{font-size:10px;color:rgba(255,255,255,0.7);font-weight:500;display:flex;align-items:center;gap:4px;}
+  .timer-bar{width:100%;height:4px;background:#e0e4ea;}
+  .timer-fill{height:100%;background:linear-gradient(90deg,#1e88e5,#1a237e);animation:countdown 300s linear forwards;}
+  @keyframes countdown{from{width:100%}to{width:0%}}
+  .container{width:100%;max-width:400px;padding:18px 16px 40px;display:flex;flex-direction:column;gap:12px;}
+  .card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 16px rgba(26,35,126,0.07);border:1px solid #e8ecf4;}
 
-  :root {
-    --navy: #1a237e;
-    --blue: #1565c0;
-    --lightblue: #1e88e5;
-    --gold: #f9a825;
-    --green: #2e7d32;
-    --lightgreen: #43a047;
-    --bg: #f5f7ff;
-    --card: #ffffff;
-    --text: #1a1a2e;
-    --muted: #78909c;
-    --border: #e8ecf4;
-  }
+  /* bilingual label */
+  .bilabel{display:flex;flex-direction:column;gap:1px;margin-bottom:4px;}
+  .bl-en{font-size:9px;font-weight:800;letter-spacing:0.12em;color:#94a3b8;text-transform:uppercase;}
+  .bl-th{font-size:10px;font-weight:600;color:#cbd5e1;}
 
-  body {
-    font-family: 'Sarabun', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  .merchant-card{background:linear-gradient(135deg,#1a237e,#283593);border-radius:16px;padding:18px 20px;color:#fff;}
+  .merchant-label{font-size:9px;font-weight:700;letter-spacing:0.15em;color:rgba(255,255,255,0.5);margin-bottom:4px;}
+  .merchant-label span{display:block;font-size:9px;color:rgba(255,255,255,0.35);}
+  .merchant-name{font-size:20px;font-weight:800;margin-bottom:2px;}
+  .merchant-id{font-size:10px;color:rgba(255,255,255,0.4);}
+  .merchant-badge{display:inline-flex;align-items:center;gap:4px;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:20px;padding:3px 10px;font-size:10px;color:rgba(255,255,255,0.7);font-weight:600;}
 
-  /* ── BANK HEADER ── */
-  .bank-header {
-    width: 100%;
-    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 60%, var(--lightblue) 100%);
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
-  }
+  .amount-label{font-size:9px;font-weight:800;letter-spacing:0.12em;color:#94a3b8;margin-bottom:4px;}
+  .amount-label span{display:block;font-size:9px;color:#cbd5e1;}
+  .amount-value{font-size:48px;font-weight:800;color:#1a237e;line-height:1;letter-spacing:-1px;}
+  .amount-currency{font-size:16px;font-weight:600;color:#94a3b8;margin-left:4px;}
+  .breakdown{margin-top:12px;border-top:1px solid #e8ecf4;padding-top:10px;display:flex;flex-direction:column;gap:5px;}
+  .brow{display:flex;justify-content:space-between;font-size:12px;color:#64748b;}
+  .brow .label{display:flex;flex-direction:column;gap:0px;}
+  .brow .label span{font-size:10px;color:#cbd5e1;}
+  .brow.total{font-weight:700;color:#1a1a2e;font-size:13px;border-top:1px dashed #e8ecf4;padding-top:8px;margin-top:2px;}
+  .delivery-row{background:#eff6ff;border-radius:8px;padding:8px 12px;font-size:12px;color:#1565c0;font-weight:600;margin-top:4px;}
+  .delivery-row span{display:block;font-size:11px;color:#93c5fd;}
 
-  .bank-header::before {
-    content: '';
-    position: absolute;
-    right: -40px; top: -40px;
-    width: 180px; height: 180px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-  }
-  .bank-header::after {
-    content: '';
-    position: absolute;
-    right: 40px; bottom: -60px;
-    width: 140px; height: 140px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.04);
-  }
+  #btn-pay{width:100%;padding:16px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(21,128,61,0.3);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  #btn-pay:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(21,128,61,0.35);}
+  #btn-pay:disabled{background:#e0e0e0;color:#9e9e9e;box-shadow:none;transform:none;cursor:not-allowed;}
+  .btn-label-en{display:block;}
+  .btn-label-th{display:block;font-size:12px;font-weight:600;opacity:0.85;}
+  .btn-spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
-  .bank-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .bank-logo-icon {
-    width: 36px; height: 36px;
-    background: #fff;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    font-weight: 900;
-    color: var(--navy);
-    letter-spacing: -1px;
-  }
-  .bank-logo-name {
-    color: #fff;
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    line-height: 1.1;
-  }
-  .bank-logo-sub {
-    color: rgba(255,255,255,0.6);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-  }
+  #success-view{display:none;flex-direction:column;align-items:center;gap:14px;padding:16px 0;text-align:center;}
+  #success-view.show{display:flex;}
+  #payment-form-view.hide{display:none;}
+  .success-circle{width:72px;height:72px;background:linear-gradient(135deg,#15803d,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 18px rgba(21,128,61,0.3);animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .success-title{font-size:20px;font-weight:800;color:#1a1a2e;}
+  .success-title span{display:block;font-size:16px;font-weight:600;color:#64748b;margin-top:2px;}
+  .success-sub{font-size:13px;color:#64748b;line-height:1.7;}
+  .success-ref{background:#fff;border-radius:10px;padding:10px 18px;font-size:12px;color:#94a3b8;border:1px solid #e8ecf4;font-weight:600;}
+  .success-ref span{color:#1a237e;}
 
-  .bank-secure {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: rgba(255,255,255,0.7);
-    font-weight: 500;
-  }
-  .lock-icon { font-size: 12px; }
-
-  /* ── MAIN CONTAINER ── */
-  .container {
-    width: 100%;
-    max-width: 420px;
-    padding: 20px 16px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  /* ── MERCHANT CARD ── */
-  .merchant-card {
-    background: linear-gradient(135deg, var(--navy) 0%, #283593 100%);
-    border-radius: 18px;
-    padding: 20px 22px;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-  }
-  .merchant-card::before {
-    content: '';
-    position: absolute;
-    right: -20px; top: -20px;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-  }
-  .merchant-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 6px;
-  }
-  .merchant-name {
-    font-size: 22px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 4px;
-  }
-  .merchant-id {
-    font-size: 11px;
-    color: rgba(255,255,255,0.4);
-    font-weight: 500;
-  }
-  .merchant-verified {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 10px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 11px;
-    color: rgba(255,255,255,0.7);
-    font-weight: 600;
-  }
-
-  /* ── AMOUNT CARD ── */
-  .amount-card {
-    background: var(--card);
-    border-radius: 18px;
-    padding: 22px;
-    box-shadow: 0 2px 16px rgba(26,35,126,0.07);
-    border: 1px solid var(--border);
-  }
-
-  .amount-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-
-  .amount-value {
-    font-size: 52px;
-    font-weight: 800;
-    color: var(--navy);
-    line-height: 1;
-    letter-spacing: -1px;
-    margin-bottom: 4px;
-  }
-  .amount-currency {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-left: 4px;
-  }
-
-  .amount-breakdown {
-    margin-top: 14px;
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .breakdown-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .breakdown-row.total {
-    font-weight: 700;
-    color: var(--text);
-    font-size: 14px;
-    border-top: 1px dashed var(--border);
-    padding-top: 8px;
-    margin-top: 2px;
-  }
-
-  /* ── PROMPTPAY QR ── */
-  .promptpay-card {
-    background: var(--card);
-    border-radius: 18px;
-    padding: 22px;
-    box-shadow: 0 2px 16px rgba(26,35,126,0.07);
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .promptpay-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-  }
-  .promptpay-logo {
-    background: linear-gradient(135deg, #1565c0, #0d47a1);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    padding: 5px 10px;
-    border-radius: 6px;
-  }
-  .promptpay-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .promptpay-sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-left: auto;
-  }
-
-  .qr-frame {
-    background: #fff;
-    border: 3px solid var(--navy);
-    border-radius: 16px;
-    padding: 14px;
-    position: relative;
-  }
-  .qr-frame::before {
-    content: '📮';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-    background: #fff;
-    padding: 4px;
-    border-radius: 6px;
-  }
-
-  /* mock QR pattern */
-  .mock-qr {
-    width: 180px;
-    height: 180px;
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    gap: 2px;
-    opacity: 0.85;
-  }
-  .qr-cell { border-radius: 2px; }
-
-  .qr-expire {
-    font-size: 12px;
-    color: var(--muted);
-    text-align: center;
-    font-weight: 500;
-  }
-  .qr-expire span { color: #e53935; font-weight: 700; }
-
-  /* ── PAY BUTTON ── */
-  #btn-pay {
-    width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, var(--green), var(--lightgreen));
-    color: #fff;
-    border: none;
-    border-radius: 14px;
-    font-family: 'Sarabun', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    box-shadow: 0 4px 16px rgba(46,125,50,0.3);
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  #btn-pay:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(46,125,50,0.35); }
-  #btn-pay:active { transform: translateY(0); }
-  #btn-pay:disabled { background: #e0e0e0; color: #9e9e9e; box-shadow: none; cursor: not-allowed; transform: none; }
-
-  /* ── SUCCESS STATE ── */
-  #success-view {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 20px 0;
-    text-align: center;
-  }
-  #success-view.show { display: flex; }
-  #payment-form-view.hide { display: none; }
-
-  .success-circle {
-    width: 80px; height: 80px;
-    background: linear-gradient(135deg, var(--green), var(--lightgreen));
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px;
-    box-shadow: 0 4px 20px rgba(46,125,50,0.3);
-    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-  .success-title { font-size: 22px; font-weight: 800; color: var(--text); }
-  .success-sub { font-size: 14px; color: var(--muted); font-weight: 500; line-height: 1.5; }
-  .success-ref {
-    background: var(--card);
-    border-radius: 10px;
-    padding: 12px 20px;
-    font-size: 12px;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-  }
-  .success-ref span { color: var(--navy); }
-
-  /* ── TIMER ── */
-  .timer-bar {
-    width: 100%;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .timer-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--lightblue), var(--navy));
-    border-radius: 2px;
-    animation: countdown 300s linear forwards;
-    transform-origin: left;
-  }
-  @keyframes countdown { from { width: 100%; } to { width: 0%; } }
-
-  /* ── FOOTER ── */
-  .bank-footer {
-    width: 100%;
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 11px;
-    color: var(--muted);
-    border-top: 1px solid var(--border);
-    margin-top: auto;
-  }
-  .bank-footer a { color: var(--muted); text-decoration: none; }
-
-  /* spinner */
-  .btn-spinner {
-    width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: none;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .bank-footer{width:100%;padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:10px;color:#94a3b8;border-top:1px solid #e8ecf4;margin-top:auto;}
+  .notice{font-size:11px;color:#cbd5e1;text-align:center;line-height:1.6;padding:0 16px;}
 </style>
 </head>
 <body>
@@ -402,207 +75,117 @@
     <div class="bank-logo-icon">PB</div>
     <div>
       <div class="bank-logo-name">PostBank</div>
-      <div class="bank-logo-sub">SECURE PAYMENT GATEWAY</div>
+      <div class="bank-logo-sub">SECURE PAYMENT</div>
     </div>
   </div>
-  <div class="bank-secure">
-    <span class="lock-icon">🔒</span>
-    SSL Secured
-  </div>
+  <div class="bank-secure">🔒 SSL Secured</div>
 </div>
-
 <div class="timer-bar"><div class="timer-fill"></div></div>
 
 <div class="container">
-
-  <div id="payment-form-view">
+  <div id="payment-form-view" style="display:flex;flex-direction:column;gap:12px;">
 
     <!-- Merchant -->
     <div class="merchant-card">
-      <div class="merchant-label">PAYMENT TO</div>
+      <div class="merchant-label">Payment to / ชำระเงินให้ <span>Verified merchant / ร้านค้าที่ตรวจสอบแล้ว</span></div>
       <div class="merchant-name">PostBox Thailand</div>
       <div class="merchant-id">Merchant ID: TH-POST-2026-0042</div>
-      <div class="merchant-verified">✓ &nbsp;Verified Merchant</div>
+      <div class="merchant-badge">✓ &nbsp;Verified / ยืนยันแล้ว</div>
     </div>
 
     <!-- Amount -->
-    <div class="amount-card">
-      <div class="amount-label" id="amount-label">TOTAL AMOUNT</div>
+    <div class="card">
+      <div class="amount-label">Total Amount <span>ยอดชำระทั้งหมด</span></div>
       <div>
         <span class="amount-value" id="display-price">—</span>
         <span class="amount-currency">THB</span>
       </div>
-      <div class="amount-breakdown" id="breakdown">
-        <div class="breakdown-row"><span id="b-base-label">Base rate</span><span id="b-base">—</span></div>
-        <div class="breakdown-row"><span id="b-wfee-label">Weight fee</span><span id="b-weight">—</span></div>
-        <div class="breakdown-row"><span id="b-sfee-label">Size fee</span><span id="b-size">—</span></div>
-        <div class="breakdown-row" id="delivery-row" style="display:none"><span id="delivery-label">Estimated delivery</span><span id="delivery-val" style="color:#1565c0;font-weight:700"></span></div>
-        <div class="breakdown-row total"><span id="b-total-label">Total</span><span id="b-total">—</span></div>
+      <div class="breakdown">
+        <div class="brow">
+          <span class="label">Base rate <span>ค่าบริการพื้นฐาน</span></span>
+          <span id="b-base">—</span>
+        </div>
+        <div class="brow">
+          <span class="label">Weight fee <span>ค่าน้ำหนัก</span></span>
+          <span id="b-weight">—</span>
+        </div>
+        <div class="brow">
+          <span class="label">Size fee <span>ค่าขนาด</span></span>
+          <span id="b-size">—</span>
+        </div>
+        <div class="brow total">
+          <span>Total / รวม</span>
+          <span id="b-total">—</span>
+        </div>
+      </div>
+      <div class="delivery-row" id="delivery-row" style="display:none">
+        🚚 Estimated delivery / ระยะเวลาจัดส่ง: <strong id="delivery-val"></strong>
+        <span>business days / วันทำการ</span>
       </div>
     </div>
 
-    <!-- PromptPay QR -->
-    <div class="promptpay-card">
-      <div class="promptpay-header">
-        <div class="promptpay-logo">PromptPay</div>
-        <div class="promptpay-title">Scan to pay</div>
-        <div class="promptpay-sub">Any Thai bank app</div>
-      </div>
-      <div class="qr-frame">
-        <canvas id="qr-canvas" width="180" height="180"></canvas>
-      </div>
-      <div class="qr-expire">QR expires in <span id="expire-time">5:00</span></div>
-    </div>
-
-    <!-- Pay Button -->
+    <!-- Pay button -->
     <button id="btn-pay" onclick="confirmPayment()">
       <div class="btn-spinner" id="btn-spinner"></div>
-      <span id="btn-text">✓ &nbsp;I have paid</span>
+      <div>
+        <span class="btn-label-en">✓ &nbsp;I have paid</span>
+        <span class="btn-label-th">ชำระเงินแล้ว</span>
+      </div>
     </button>
 
-    <div style="font-size:11px;color:#94a3b8;text-align:center;line-height:1.6">
-      By confirming, you certify that payment has been made.<br>
-      Your package will be sorted automatically.
-    </div>
-
+    <p class="notice">
+      By confirming, you certify payment has been made.<br>
+      <span style="color:#e2e8f0">การยืนยันถือว่าคุณได้ชำระเงินเรียบร้อยแล้ว</span>
+    </p>
   </div>
 
   <!-- Success -->
   <div id="success-view">
     <div class="success-circle">✓</div>
-    <div class="success-title" id="success-title">Payment Confirmed</div>
-    <div class="success-sub" id="success-sub">Your package is being sorted now.<br>Please collect it from the correct bin.</div>
+    <div class="success-title">
+      Payment Confirmed
+      <span>ยืนยันการชำระเงินแล้ว</span>
+    </div>
+    <div class="success-sub">
+      Your package is being sorted now.<br>
+      <span style="color:#94a3b8">Please collect it from the correct bin.</span><br><br>
+      <span style="color:#64748b">พัสดุของคุณกำลังถูกจัดเรียง</span><br>
+      <span style="color:#94a3b8">กรุณารับพัสดุที่ช่องที่ถูกต้อง</span>
+    </div>
     <div class="success-ref">Ref: <span id="ref-no">PB-000000</span></div>
-    <div style="font-size:13px;color:#94a3b8;font-weight:500" id="success-close">You may close this page.</div>
+    <div style="font-size:12px;color:#94a3b8;line-height:1.7;">
+      You may close this page.<br>
+      <span style="color:#cbd5e1">คุณสามารถปิดหน้านี้ได้</span>
+    </div>
   </div>
-
 </div>
 
 <div class="bank-footer">
-  <span>🔒 256-bit Encryption</span>
-  <span>·</span>
-  <span>PostBank © 2026</span>
-  <span>·</span>
-  <span>Privacy Policy</span>
+  <span>🔒 256-bit Encryption</span>·<span>PostBank © 2026</span>
 </div>
 
 <script>
-  // ── READ URL PARAMS ───────────────────────────────────────────────
   const params   = new URLSearchParams(window.location.search);
-  const peerID   = params.get('peer');
-  const price    = params.get('price')    || '—';
-  const baseRate = params.get('base')     || '—';
-  const wFee     = params.get('wfee')     || '—';
-  const sFee     = params.get('sfee')     || '—';
-
-  const lang  = params.get('lang') || 'en';
-  const days  = params.get('days') || '';
-
-  const T = {
-    en: {
-      title: 'TOTAL AMOUNT', base: 'Base rate', wfee: 'Weight fee',
-      sfee: 'Size fee', total: 'Total', delivery: 'Estimated delivery',
-      deliveryPost: 'business days', pay: '✓  I have paid',
-      paying: 'Processing...', successTitle: 'Payment Confirmed',
-      successSub: 'Your package is being sorted now.\nPlease collect it from the correct bin.',
-      close: 'You may close this page.',
-    },
-    th: {
-      title: 'ยอดชำระทั้งหมด', base: 'ค่าบริการพื้นฐาน', wfee: 'ค่าน้ำหนัก',
-      sfee: 'ค่าขนาด', total: 'รวมทั้งหมด', delivery: 'ระยะเวลาจัดส่งโดยประมาณ',
-      deliveryPost: 'วันทำการ', pay: '✓  ชำระเงินแล้ว',
-      paying: 'กำลังดำเนินการ...', successTitle: 'ยืนยันการชำระเงินแล้ว',
-      successSub: 'พัสดุของคุณกำลังถูกจัดเรียง\nกรุณารับพัสดุที่ช่องที่ถูกต้อง',
-      close: 'คุณสามารถปิดหน้านี้ได้',
-    }
-  };
-  const t = T[lang] || T['en'];
+  const peerID   = params.get('peer')  || '';
+  const price    = params.get('price') || '—';
+  const baseRate = params.get('base')  || '—';
+  const wFee     = params.get('wfee')  || '—';
+  const sFee     = params.get('sfee')  || '—';
+  const days     = params.get('days')  || '';
 
   document.getElementById('display-price').textContent = price;
-  document.getElementById('b-base').textContent   = baseRate !== '—' ? '฿' + baseRate : '—';
-  document.getElementById('b-weight').textContent = wFee !== '—'     ? '฿' + wFee     : '—';
-  document.getElementById('b-size').textContent   = sFee !== '—'     ? '฿' + sFee     : '—';
-  document.getElementById('b-total').textContent  = price !== '—'    ? '฿' + price    : '—';
+  document.getElementById('b-base').textContent   = baseRate !== '—' ? '฿'+baseRate : '—';
+  document.getElementById('b-weight').textContent = wFee     !== '—' ? '฿'+wFee     : '—';
+  document.getElementById('b-size').textContent   = sFee     !== '—' ? '฿'+sFee     : '—';
+  document.getElementById('b-total').textContent  = price    !== '—' ? '฿'+price    : '—';
 
-  // Apply translations
-  document.getElementById('amount-label').textContent  = t.title;
-  document.getElementById('b-base-label').textContent  = t.base;
-  document.getElementById('b-wfee-label').textContent  = t.wfee;
-  document.getElementById('b-sfee-label').textContent  = t.sfee;
-  document.getElementById('b-total-label').textContent = t.total;
-  document.getElementById('btn-text').textContent      = t.pay;
-  document.getElementById('success-title').textContent = t.successTitle;
-  document.getElementById('success-sub').textContent   = t.successSub;
-  document.getElementById('success-close').textContent = t.close;
-
-  // Show delivery estimate
   if (days) {
-    const el = document.getElementById('delivery-row');
-    el.style.display = 'flex';
-    document.getElementById('delivery-label').textContent = t.delivery;
-    document.getElementById('delivery-val').textContent   = days + ' ' + t.deliveryPost;
+    document.getElementById('delivery-row').style.display = 'block';
+    document.getElementById('delivery-val').textContent   = days;
   }
 
-  // ── DRAW MOCK QR ─────────────────────────────────────────────────
-  // Draws a realistic-looking QR pattern on canvas
-  function drawMockQR() {
-    const canvas = document.getElementById('qr-canvas');
-    const ctx = canvas.getContext('2d');
-    const size = 180;
-    const cells = 21;
-    const cell = size / cells;
-
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, size, size);
-
-    // Seeded pseudo-random for consistent pattern
-    let seed = 42;
-    function rand() { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return (seed >>> 0) / 0xffffffff; }
-
-    // Draw random cells
-    ctx.fillStyle = '#1a237e';
-    for (let r = 0; r < cells; r++) {
-      for (let c = 0; c < cells; c++) {
-        // Skip finder pattern areas
-        const inTL = r < 9 && c < 9;
-        const inTR = r < 9 && c > cells - 10;
-        const inBL = r > cells - 10 && c < 9;
-        if (inTL || inTR || inBL) continue;
-        if (rand() > 0.55) {
-          ctx.fillRect(c * cell + 1, r * cell + 1, cell - 1, cell - 1);
-        }
-      }
-    }
-
-    // Draw finder patterns (corner squares)
-    function drawFinder(x, y) {
-      ctx.fillStyle = '#1a237e';
-      ctx.fillRect(x, y, cell * 7, cell * 7);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(x + cell, y + cell, cell * 5, cell * 5);
-      ctx.fillStyle = '#1a237e';
-      ctx.fillRect(x + cell * 2, y + cell * 2, cell * 3, cell * 3);
-    }
-    drawFinder(0, 0);
-    drawFinder((cells - 7) * cell, 0);
-    drawFinder(0, (cells - 7) * cell);
-  }
-
-  drawMockQR();
-
-  // ── QR COUNTDOWN ─────────────────────────────────────────────────
-  let seconds = 300;
-  const timer = setInterval(() => {
-    seconds--;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    document.getElementById('expire-time').textContent = `${m}:${s.toString().padStart(2,'0')}`;
-    if (seconds <= 0) { clearInterval(timer); document.getElementById('expire-time').textContent = 'Expired'; }
-  }, 1000);
-
-  // ── PEERJS ───────────────────────────────────────────────────────
+  // Connect to dashboard
   let conn = null;
-
   if (peerID) {
     const myPeer = new Peer();
     myPeer.on('open', () => {
@@ -610,23 +193,27 @@
     });
   }
 
-  // ── CONFIRM PAYMENT ──────────────────────────────────────────────
+  // Countdown
+  let secs = 300;
+  // (timer bar handles visual, no separate text needed)
+
   function confirmPayment() {
     const btn     = document.getElementById('btn-pay');
     const spinner = document.getElementById('btn-spinner');
-    const btnText = document.getElementById('btn-text');
-
-    btn.disabled      = true;
+    btn.disabled = true;
     spinner.style.display = 'block';
-    btnText.textContent   = 'Processing...';
 
-    // Send confirmation to dashboard
-    if (conn && conn.open) {
-      conn.send({ type: 'payment_confirmed' });
+    if (conn && conn.open) conn.send({ type: 'payment_confirmed' });
+    else if (peerID) {
+      // Try connecting again if not yet connected
+      const mp = new Peer();
+      mp.on('open', () => {
+        const c = mp.connect(peerID);
+        c.on('open', () => c.send({ type: 'payment_confirmed' }));
+      });
     }
 
-    // Generate reference number
-    const ref = 'PB-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+    const ref = 'PB-' + Math.random().toString(36).substr(2,6).toUpperCase();
     document.getElementById('ref-no').textContent = ref;
 
     setTimeout(() => {
