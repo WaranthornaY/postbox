@@ -3,322 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PostBox — Pre-fill / กรอกข้อมูลล่วงหน้า</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>PostBox Payment</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Sarabun',sans-serif;background:#f4f2ed;min-height:100vh;padding:28px 16px;display:flex;flex-direction:column;align-items:center;}
-  .top{width:100%;max-width:480px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-  .wordmark{font-size:12px;font-weight:800;letter-spacing:0.2em;color:#999;}
-  h1{font-size:18px;font-weight:800;color:#111;margin-bottom:2px;}
-  h1 span{display:block;font-size:15px;font-weight:600;color:#666;margin-top:2px;}
-  .card{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:480px;box-shadow:0 2px 24px rgba(0,0,0,0.07);margin-bottom:16px;}
-  .section-title{font-size:10px;font-weight:800;letter-spacing:0.15em;color:#2563eb;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #eff6ff;}
-  .section-title span{display:block;font-size:10px;color:#94a3b8;letter-spacing:0.1em;margin-top:2px;}
-  .field{margin-bottom:14px;}
-  label{display:flex;flex-direction:column;gap:1px;margin-bottom:5px;}
-  .lbl-en{font-size:10px;font-weight:800;letter-spacing:0.08em;color:#64748b;text-transform:uppercase;}
-  .lbl-th{font-size:11px;font-weight:600;color:#94a3b8;}
-  input,select,textarea{width:100%;padding:10px 13px;border:1.5px solid #e8e8e8;border-radius:10px;font-size:13px;color:#111;background:#fafafa;font-family:inherit;transition:border-color 0.15s;appearance:none;}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;background:#fff;}
-  textarea{resize:none;height:70px;line-height:1.5;}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .region-header{font-size:11px;font-weight:800;color:#fff;padding:6px 12px;border-radius:6px;margin-bottom:4px;}
-  .r-N{background:#059669;} .r-NE{background:#7c3aed;} .r-C{background:#2563eb;} .r-E{background:#d97706;} .r-S{background:#dc2626;}
-  select optgroup{font-weight:700;}
-  .submit-btn{width:100%;padding:14px;background:#111;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:0.04em;transition:background 0.15s;}
-  .submit-btn:hover{background:#333;}
-  .submit-btn:disabled{background:#ccc;cursor:not-allowed;}
-  /* QR result screen */
-  #result-view{display:none;flex-direction:column;align-items:center;gap:20px;width:100%;max-width:480px;}
-  #result-view.show{display:flex;}
-  #form-view.hide{display:none;}
-  .qr-card{background:#fff;border-radius:16px;padding:28px 24px;width:100%;box-shadow:0 2px 24px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;gap:16px;}
-  #qr-output{border:3px solid #1a1a2e;border-radius:12px;padding:12px;background:#fff;}
-  .qr-instruction{text-align:center;font-size:14px;color:#1a1a2e;font-weight:700;line-height:1.6;}
-  .qr-instruction span{display:block;font-size:12px;color:#64748b;font-weight:500;margin-top:4px;}
-  .summary-grid{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .summary-item{background:#f8fafc;border-radius:8px;padding:10px 12px;}
-  .summary-label{font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:0.08em;margin-bottom:2px;}
-  .summary-label span{display:block;font-size:10px;color:#cbd5e1;}
-  .summary-value{font-size:13px;font-weight:700;color:#1a1a2e;}
-  .back-btn{background:transparent;border:2px solid #e0e4ea;border-radius:10px;padding:10px 24px;font-family:inherit;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;width:100%;}
-  .back-btn:hover{border-color:#2563eb;color:#2563eb;}
-  .notice{font-size:11px;color:#bbb;text-align:center;max-width:480px;}
+  body{font-family:'Sarabun',sans-serif;background:#f5f7ff;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+  .bank-header{width:100%;background:linear-gradient(135deg,#1a237e,#1565c0,#1e88e5);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+  .bank-logo{display:flex;align-items:center;gap:10px;}
+  .bank-logo-icon{width:34px;height:34px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#1a237e;}
+  .bank-logo-name{color:#fff;font-size:14px;font-weight:800;line-height:1.1;}
+  .bank-logo-sub{color:rgba(255,255,255,0.6);font-size:9px;font-weight:500;letter-spacing:0.1em;}
+  .bank-secure{font-size:10px;color:rgba(255,255,255,0.7);font-weight:500;display:flex;align-items:center;gap:4px;}
+  .timer-bar{width:100%;height:4px;background:#e0e4ea;}
+  .timer-fill{height:100%;background:linear-gradient(90deg,#1e88e5,#1a237e);animation:countdown 300s linear forwards;}
+  @keyframes countdown{from{width:100%}to{width:0%}}
+  .container{width:100%;max-width:400px;padding:18px 16px 40px;display:flex;flex-direction:column;gap:12px;}
+  .card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 16px rgba(26,35,126,0.07);border:1px solid #e8ecf4;}
+
+  /* bilingual label */
+  .bilabel{display:flex;flex-direction:column;gap:1px;margin-bottom:4px;}
+  .bl-en{font-size:9px;font-weight:800;letter-spacing:0.12em;color:#94a3b8;text-transform:uppercase;}
+  .bl-th{font-size:10px;font-weight:600;color:#cbd5e1;}
+
+  .merchant-card{background:linear-gradient(135deg,#1a237e,#283593);border-radius:16px;padding:18px 20px;color:#fff;}
+  .merchant-label{font-size:9px;font-weight:700;letter-spacing:0.15em;color:rgba(255,255,255,0.5);margin-bottom:4px;}
+  .merchant-label span{display:block;font-size:9px;color:rgba(255,255,255,0.35);}
+  .merchant-name{font-size:20px;font-weight:800;margin-bottom:2px;}
+  .merchant-id{font-size:10px;color:rgba(255,255,255,0.4);}
+  .merchant-badge{display:inline-flex;align-items:center;gap:4px;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:20px;padding:3px 10px;font-size:10px;color:rgba(255,255,255,0.7);font-weight:600;}
+
+  .amount-label{font-size:9px;font-weight:800;letter-spacing:0.12em;color:#94a3b8;margin-bottom:4px;}
+  .amount-label span{display:block;font-size:9px;color:#cbd5e1;}
+  .amount-value{font-size:48px;font-weight:800;color:#1a237e;line-height:1;letter-spacing:-1px;}
+  .amount-currency{font-size:16px;font-weight:600;color:#94a3b8;margin-left:4px;}
+  .breakdown{margin-top:12px;border-top:1px solid #e8ecf4;padding-top:10px;display:flex;flex-direction:column;gap:5px;}
+  .brow{display:flex;justify-content:space-between;font-size:12px;color:#64748b;}
+  .brow .label{display:flex;flex-direction:column;gap:0px;}
+  .brow .label span{font-size:10px;color:#cbd5e1;}
+  .brow.total{font-weight:700;color:#1a1a2e;font-size:13px;border-top:1px dashed #e8ecf4;padding-top:8px;margin-top:2px;}
+  .delivery-row{background:#eff6ff;border-radius:8px;padding:8px 12px;font-size:12px;color:#1565c0;font-weight:600;margin-top:4px;}
+  .delivery-row span{display:block;font-size:11px;color:#93c5fd;}
+
+  #btn-pay{width:100%;padding:16px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(21,128,61,0.3);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  #btn-pay:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(21,128,61,0.35);}
+  #btn-pay:disabled{background:#e0e0e0;color:#9e9e9e;box-shadow:none;transform:none;cursor:not-allowed;}
+  .btn-label-en{display:block;}
+  .btn-label-th{display:block;font-size:12px;font-weight:600;opacity:0.85;}
+  .btn-spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  #success-view{display:none;flex-direction:column;align-items:center;gap:14px;padding:16px 0;text-align:center;}
+  #success-view.show{display:flex;}
+  #payment-form-view.hide{display:none;}
+  .success-circle{width:72px;height:72px;background:linear-gradient(135deg,#15803d,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 18px rgba(21,128,61,0.3);animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .success-title{font-size:20px;font-weight:800;color:#1a1a2e;}
+  .success-title span{display:block;font-size:16px;font-weight:600;color:#64748b;margin-top:2px;}
+  .success-sub{font-size:13px;color:#64748b;line-height:1.7;}
+  .success-ref{background:#fff;border-radius:10px;padding:10px 18px;font-size:12px;color:#94a3b8;border:1px solid #e8ecf4;font-weight:600;}
+  .success-ref span{color:#1a237e;}
+
+  .bank-footer{width:100%;padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:10px;color:#94a3b8;border-top:1px solid #e8ecf4;margin-top:auto;}
+  .notice{font-size:11px;color:#cbd5e1;text-align:center;line-height:1.6;padding:0 16px;}
 </style>
 </head>
 <body>
 
-<div class="top">
-  <div class="wordmark">POSTBOX</div>
+<div class="bank-header">
+  <div class="bank-logo">
+    <div class="bank-logo-icon">PB</div>
+    <div>
+      <div class="bank-logo-name">PostBank</div>
+      <div class="bank-logo-sub">SECURE PAYMENT</div>
+    </div>
+  </div>
+  <div class="bank-secure">🔒 SSL Secured</div>
 </div>
+<div class="timer-bar"><div class="timer-fill"></div></div>
 
-<div id="form-view" style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:14px;">
-  <div>
-    <h1>Pre-fill your package <span>กรอกข้อมูลพัสดุล่วงหน้า</span></h1>
-  </div>
+<div class="container">
+  <div id="payment-form-view" style="display:flex;flex-direction:column;gap:12px;">
 
-  <!-- Receiver info -->
-  <div class="card">
-    <div class="section-title">Receiver Information <span>ข้อมูลผู้รับ</span></div>
-
-    <div class="field">
-      <label><span class="lbl-en">Receiver Name</span><span class="lbl-th">ชื่อผู้รับ</span></label>
-      <input type="text" id="recv-name" placeholder="Full name / ชื่อ-นามสกุล">
+    <!-- Merchant -->
+    <div class="merchant-card">
+      <div class="merchant-label">Payment to / ชำระเงินให้ <span>Verified merchant / ร้านค้าที่ตรวจสอบแล้ว</span></div>
+      <div class="merchant-name">PostBox Thailand</div>
+      <div class="merchant-id">Merchant ID: TH-POST-2026-0042</div>
+      <div class="merchant-badge">✓ &nbsp;Verified / ยืนยันแล้ว</div>
     </div>
 
-    <div class="field">
-      <label><span class="lbl-en">Phone Number</span><span class="lbl-th">เบอร์โทรศัพท์</span></label>
-      <input type="tel" id="recv-tel" placeholder="0812345678">
+    <!-- Amount -->
+    <div class="card">
+      <div class="amount-label">Total Amount <span>ยอดชำระทั้งหมด</span></div>
+      <div>
+        <span class="amount-value" id="display-price">—</span>
+        <span class="amount-currency">THB</span>
+      </div>
+      <div class="breakdown">
+        <div class="brow">
+          <span class="label">Base rate <span>ค่าบริการพื้นฐาน</span></span>
+          <span id="b-base">—</span>
+        </div>
+        <div class="brow">
+          <span class="label">Weight fee <span>ค่าน้ำหนัก</span></span>
+          <span id="b-weight">—</span>
+        </div>
+        <div class="brow">
+          <span class="label">Size fee <span>ค่าขนาด</span></span>
+          <span id="b-size">—</span>
+        </div>
+        <div class="brow total">
+          <span>Total / รวม</span>
+          <span id="b-total">—</span>
+        </div>
+      </div>
+      <div class="delivery-row" id="delivery-row" style="display:none">
+        🚚 Estimated delivery / ระยะเวลาจัดส่ง: <strong id="delivery-val"></strong>
+        <span>business days / วันทำการ</span>
+      </div>
     </div>
 
-    <div class="field">
-      <label><span class="lbl-en">Delivery Address</span><span class="lbl-th">ที่อยู่จัดส่ง</span></label>
-      <textarea id="recv-address" placeholder="House number, street, district / บ้านเลขที่ ถนน แขวง/ตำบล"></textarea>
-    </div>
-  </div>
+    <!-- Pay button -->
+    <button id="btn-pay" onclick="confirmPayment()">
+      <div class="btn-spinner" id="btn-spinner"></div>
+      <div>
+        <span class="btn-label-en">✓ &nbsp;I have paid</span>
+        <span class="btn-label-th">ชำระเงินแล้ว</span>
+      </div>
+    </button>
 
-  <!-- Destination -->
-  <div class="card">
-    <div class="section-title">Destination <span>ปลายทาง</span></div>
-    <div class="field">
-      <label><span class="lbl-en">Destination Province</span><span class="lbl-th">จังหวัดปลายทาง</span></label>
-      <select id="province">
-        <option value="">— Select / เลือกจังหวัด —</option>
-        <optgroup label="🟢 NORTH / ภาคเหนือ">
-          <option value="Chiang Mai|N">Chiang Mai / เชียงใหม่</option>
-          <option value="Chiang Rai|N">Chiang Rai / เชียงราย</option>
-          <option value="Mae Hong Son|N">Mae Hong Son / แม่ฮ่องสอน</option>
-          <option value="Nan|N">Nan / น่าน</option>
-          <option value="Phayao|N">Phayao / พะเยา</option>
-          <option value="Phrae|N">Phrae / แพร่</option>
-          <option value="Lampang|N">Lampang / ลำปาง</option>
-          <option value="Lamphun|N">Lamphun / ลำพูน</option>
-          <option value="Uttaradit|N">Uttaradit / อุตรดิตถ์</option>
-          <option value="Tak|N">Tak / ตาก</option>
-          <option value="Sukhothai|N">Sukhothai / สุโขทัย</option>
-          <option value="Phitsanulok|N">Phitsanulok / พิษณุโลก</option>
-          <option value="Phichit|N">Phichit / พิจิตร</option>
-          <option value="Phetchabun|N">Phetchabun / เพชรบูรณ์</option>
-          <option value="Kamphaeng Phet|N">Kamphaeng Phet / กำแพงเพชร</option>
-          <option value="Nakhon Sawan|N">Nakhon Sawan / นครสวรรค์</option>
-          <option value="Uthai Thani|N">Uthai Thani / อุทัยธานี</option>
-        </optgroup>
-        <optgroup label="🟣 NORTHEAST / ภาคอีสาน">
-          <option value="Loei|NE">Loei / เลย</option>
-          <option value="Udon Thani|NE">Udon Thani / อุดรธานี</option>
-          <option value="Nong Khai|NE">Nong Khai / หนองคาย</option>
-          <option value="Bueng Kan|NE">Bueng Kan / บึงกาฬ</option>
-          <option value="Nong Bua Lamphu|NE">Nong Bua Lamphu / หนองบัวลำภู</option>
-          <option value="Sakon Nakhon|NE">Sakon Nakhon / สกลนคร</option>
-          <option value="Nakhon Phanom|NE">Nakhon Phanom / นครพนม</option>
-          <option value="Mukdahan|NE">Mukdahan / มุกดาหาร</option>
-          <option value="Khon Kaen|NE">Khon Kaen / ขอนแก่น</option>
-          <option value="Kalasin|NE">Kalasin / กาฬสินธุ์</option>
-          <option value="Maha Sarakham|NE">Maha Sarakham / มหาสารคาม</option>
-          <option value="Roi Et|NE">Roi Et / ร้อยเอ็ด</option>
-          <option value="Yasothon|NE">Yasothon / ยโสธร</option>
-          <option value="Amnat Charoen|NE">Amnat Charoen / อำนาจเจริญ</option>
-          <option value="Ubon Ratchathani|NE">Ubon Ratchathani / อุบลราชธานี</option>
-          <option value="Si Sa Ket|NE">Si Sa Ket / ศรีสะเกษ</option>
-          <option value="Surin|NE">Surin / สุรินทร์</option>
-          <option value="Buri Ram|NE">Buri Ram / บุรีรัมย์</option>
-          <option value="Nakhon Ratchasima|NE">Nakhon Ratchasima / นครราชสีมา</option>
-          <option value="Chaiyaphum|NE">Chaiyaphum / ชัยภูมิ</option>
-        </optgroup>
-        <optgroup label="🔵 CENTRAL / ภาคกลาง">
-          <option value="Bangkok|C">Bangkok / กรุงเทพมหานคร</option>
-          <option value="Nonthaburi|C">Nonthaburi / นนทบุรี</option>
-          <option value="Pathum Thani|C">Pathum Thani / ปทุมธานี</option>
-          <option value="Samut Prakan|C">Samut Prakan / สมุทรปราการ</option>
-          <option value="Samut Sakhon|C">Samut Sakhon / สมุทรสาคร</option>
-          <option value="Samut Songkhram|C">Samut Songkhram / สมุทรสงคราม</option>
-          <option value="Nakhon Pathom|C">Nakhon Pathom / นครปฐม</option>
-          <option value="Ratchaburi|C">Ratchaburi / ราชบุรี</option>
-          <option value="Kanchanaburi|C">Kanchanaburi / กาญจนบุรี</option>
-          <option value="Suphan Buri|C">Suphan Buri / สุพรรณบุรี</option>
-          <option value="Chai Nat|C">Chai Nat / ชัยนาท</option>
-          <option value="Sing Buri|C">Sing Buri / สิงห์บุรี</option>
-          <option value="Ang Thong|C">Ang Thong / อ่างทอง</option>
-          <option value="Ayutthaya|C">Ayutthaya / พระนครศรีอยุธยา</option>
-          <option value="Lop Buri|C">Lop Buri / ลพบุรี</option>
-          <option value="Saraburi|C">Saraburi / สระบุรี</option>
-          <option value="Nakhon Nayok|C">Nakhon Nayok / นครนายก</option>
-          <option value="Prachin Buri|C">Prachin Buri / ปราจีนบุรี</option>
-          <option value="Phetchaburi|C">Phetchaburi / เพชรบุรี</option>
-          <option value="Prachuap Khiri Khan|C">Prachuap Khiri Khan / ประจวบคีรีขันธ์</option>
-        </optgroup>
-        <optgroup label="🟠 EAST / ภาคตะวันออก">
-          <option value="Chachoengsao|E">Chachoengsao / ฉะเชิงเทรา</option>
-          <option value="Chon Buri|E">Chon Buri / ชลบุรี</option>
-          <option value="Rayong|E">Rayong / ระยอง</option>
-          <option value="Chanthaburi|E">Chanthaburi / จันทบุรี</option>
-          <option value="Trat|E">Trat / ตราด</option>
-          <option value="Sa Kaeo|E">Sa Kaeo / สระแก้ว</option>
-        </optgroup>
-        <optgroup label="🔴 SOUTH / ภาคใต้">
-          <option value="Chumphon|S">Chumphon / ชุมพร</option>
-          <option value="Ranong|S">Ranong / ระนอง</option>
-          <option value="Surat Thani|S">Surat Thani / สุราษฎร์ธานี</option>
-          <option value="Nakhon Si Thammarat|S">Nakhon Si Thammarat / นครศรีธรรมราช</option>
-          <option value="Phatthalung|S">Phatthalung / พัทลุง</option>
-          <option value="Songkhla|S">Songkhla / สงขลา</option>
-          <option value="Satun|S">Satun / สตูล</option>
-          <option value="Trang|S">Trang / ตรัง</option>
-          <option value="Krabi|S">Krabi / กระบี่</option>
-          <option value="Phangnga|S">Phangnga / พังงา</option>
-          <option value="Phuket|S">Phuket / ภูเก็ต</option>
-          <option value="Yala|S">Yala / ยะลา</option>
-          <option value="Pattani|S">Pattani / ปัตตานี</option>
-          <option value="Narathiwat|S">Narathiwat / นราธิวาส</option>
-        </optgroup>
-      </select>
-    </div>
-  </div>
-
-  <!-- Estimated package -->
-  <div class="card">
-    <div class="section-title">Package Estimate <span>ประมาณการพัสดุ</span></div>
-    <p style="font-size:11px;color:#94a3b8;margin-bottom:12px;line-height:1.6">
-      This helps estimate your price. The machine will measure the actual weight and size.
-      <span style="display:block">ใช้สำหรับประมาณราคา เครื่องจะวัดน้ำหนักและขนาดจริงให้อัตโนมัติ</span>
+    <p class="notice">
+      By confirming, you certify payment has been made.<br>
+      <span style="color:#e2e8f0">การยืนยันถือว่าคุณได้ชำระเงินเรียบร้อยแล้ว</span>
     </p>
-    <div class="row">
-      <div class="field">
-        <label><span class="lbl-en">Est. Weight</span><span class="lbl-th">น้ำหนักโดยประมาณ</span></label>
-        <select id="est-weight">
-          <option value="250">Under 0.5kg / น้อยกว่า 0.5 กก.</option>
-          <option value="500" selected>0.5 – 1kg</option>
-          <option value="1500">1 – 2kg</option>
-          <option value="3500">2 – 5kg</option>
-          <option value="7500">Over 5kg / มากกว่า 5 กก.</option>
-        </select>
-      </div>
-      <div class="field">
-        <label><span class="lbl-en">Est. Size</span><span class="lbl-th">ขนาดโดยประมาณ</span></label>
-        <select id="est-size">
-          <option value="S">S — Small / เล็ก</option>
-          <option value="M" selected>M — Medium / กลาง</option>
-          <option value="L">L — Large / ใหญ่</option>
-          <option value="XL">XL — Extra Large / ใหญ่พิเศษ</option>
-        </select>
-      </div>
-    </div>
   </div>
 
-  <button class="submit-btn" id="submit-btn" onclick="generateQR()" disabled>
-    Generate QR Code / สร้าง QR Code
-  </button>
+  <!-- Success -->
+  <div id="success-view">
+    <div class="success-circle">✓</div>
+    <div class="success-title">
+      Payment Confirmed
+      <span>ยืนยันการชำระเงินแล้ว</span>
+    </div>
+    <div class="success-sub">
+      Your package is being sorted now.<br>
+      <span style="color:#94a3b8">Please collect it from the correct bin.</span><br><br>
+      <span style="color:#64748b">พัสดุของคุณกำลังถูกจัดเรียง</span><br>
+      <span style="color:#94a3b8">กรุณารับพัสดุที่ช่องที่ถูกต้อง</span>
+    </div>
+    <div class="success-ref">Ref: <span id="ref-no">PB-000000</span></div>
+    <div style="font-size:12px;color:#94a3b8;line-height:1.7;">
+      You may close this page.<br>
+      <span style="color:#cbd5e1">คุณสามารถปิดหน้านี้ได้</span>
+    </div>
+  </div>
 </div>
 
-<!-- Result view -->
-<div id="result-view">
-  <div class="qr-card">
-    <div class="qr-instruction">
-      Show this QR at the PostBox machine
-      <span>แสดง QR นี้ที่เครื่อง PostBox</span>
-    </div>
-    <div id="qr-output"></div>
-    <div style="text-align:center;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#94a3b8;margin-bottom:6px;">REFERENCE / อ้างอิง</div>
-      <div style="font-size:18px;font-weight:800;color:#1a1a2e;" id="ref-display"></div>
-    </div>
-  </div>
-
-  <div class="card" style="padding:18px 20px;">
-    <div class="section-title">Your Details / ข้อมูลของคุณ</div>
-    <div class="summary-grid" id="summary-grid"></div>
-  </div>
-
-  <button class="back-btn" onclick="goBack()">← Fill again / กรอกใหม่</button>
+<div class="bank-footer">
+  <span>🔒 256-bit Encryption</span>·<span>PostBank © 2026</span>
 </div>
-
-<p class="notice">Data is encoded in the QR only — not stored anywhere. / ข้อมูลถูกเข้ารหัสใน QR เท่านั้น ไม่มีการจัดเก็บ</p>
 
 <script>
-  const BASE_RATE   = 30;
-  const WEIGHT_RATE = 0.05;
-  const SIZE_FEES   = { S:0, M:20, L:50, XL:80 };
-  const REGION_FEES = { N:20, NE:20, C:0, E:10, S:25 };
-  const DELIVERY    = { N:'2-3', NE:'2-3', C:'1', E:'1-2', S:'3-4' };
+  const params   = new URLSearchParams(window.location.search);
+  const peerID   = params.get('peer')  || '';
+  const price    = params.get('price') || '—';
+  const baseRate = params.get('base')  || '—';
+  const wFee     = params.get('wfee')  || '—';
+  const sFee     = params.get('sfee')  || '—';
+  const days     = params.get('days')  || '';
 
-  // Enable submit when required fields filled
-  ['recv-name','recv-tel','recv-address','province'].forEach(id => {
-    document.getElementById(id).addEventListener('input', checkReady);
-    document.getElementById(id).addEventListener('change', checkReady);
-  });
+  document.getElementById('display-price').textContent = price;
+  document.getElementById('b-base').textContent   = baseRate !== '—' ? '฿'+baseRate : '—';
+  document.getElementById('b-weight').textContent = wFee     !== '—' ? '฿'+wFee     : '—';
+  document.getElementById('b-size').textContent   = sFee     !== '—' ? '฿'+sFee     : '—';
+  document.getElementById('b-total').textContent  = price    !== '—' ? '฿'+price    : '—';
 
-  function checkReady() {
-    const ok = document.getElementById('recv-name').value.trim() &&
-               document.getElementById('recv-tel').value.trim() &&
-               document.getElementById('recv-address').value.trim() &&
-               document.getElementById('province').value;
-    document.getElementById('submit-btn').disabled = !ok;
+  if (days) {
+    document.getElementById('delivery-row').style.display = 'block';
+    document.getElementById('delivery-val').textContent   = days;
   }
 
-  function generateQR() {
-    const [province, region] = document.getElementById('province').value.split('|');
-    const estWeight = parseInt(document.getElementById('est-weight').value);
-    const estSize   = document.getElementById('est-size').value;
-    const weightFee = Math.round(estWeight * WEIGHT_RATE);
-    const sizeFee   = SIZE_FEES[estSize] ?? 0;
-    const regionFee = REGION_FEES[region] ?? 0;
-    const estPrice  = BASE_RATE + weightFee + sizeFee + regionFee;
-    const days      = DELIVERY[region] ?? '2-3';
-    const ref       = 'PB-' + Math.random().toString(36).substr(2,6).toUpperCase();
-
-    const data = {
-      n: document.getElementById('recv-name').value.trim(),
-      t: document.getElementById('recv-tel').value.trim(),
-      a: document.getElementById('recv-address').value.trim(),
-      p: province,
-      r: region,
-      ew: estWeight,
-      es: estSize,
-      ep: estPrice,
-      d:  days,
-      ref: ref,
-    };
-
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-    const qrContent = 'POSTBOX:' + encoded;
-
-    // Show result view
-    document.getElementById('form-view').classList.add('hide');
-    document.getElementById('result-view').classList.add('show');
-    document.getElementById('ref-display').textContent = ref;
-
-    // Generate QR
-    document.getElementById('qr-output').innerHTML = '';
-    new QRCode(document.getElementById('qr-output'), {
-      text: qrContent,
-      width: 220, height: 220,
-      colorDark: '#1a1a2e', colorLight: '#ffffff',
+  // Connect to dashboard
+  let conn = null;
+  if (peerID) {
+    const myPeer = new Peer();
+    myPeer.on('open', () => {
+      conn = myPeer.connect(peerID);
     });
-
-    // Summary
-    const regionNames = { N:'North / เหนือ', NE:'Northeast / อีสาน', C:'Central / กลาง', E:'East / ตะวันออก', S:'South / ใต้' };
-    document.getElementById('summary-grid').innerHTML = [
-      ['Receiver / ผู้รับ', data.n],
-      ['Tel / โทร', data.t],
-      ['Province / จังหวัด', data.p],
-      ['Region / ภาค', regionNames[region]],
-      ['Est. Weight / น้ำหนักประมาณ', estWeight + 'g'],
-      ['Est. Size / ขนาดประมาณ', estSize],
-      ['Est. Price / ราคาประมาณ', '฿' + estPrice],
-      ['Delivery / จัดส่ง', days + ' days / วัน'],
-    ].map(([l,v]) => `
-      <div class="summary-item">
-        <div class="summary-label">${l}</div>
-        <div class="summary-value">${v}</div>
-      </div>`).join('');
   }
 
-  function goBack() {
-    document.getElementById('form-view').classList.remove('hide');
-    document.getElementById('result-view').classList.remove('show');
-    document.getElementById('qr-output').innerHTML = '';
+  // Countdown
+  let secs = 300;
+  // (timer bar handles visual, no separate text needed)
+
+  function confirmPayment() {
+    const btn     = document.getElementById('btn-pay');
+    const spinner = document.getElementById('btn-spinner');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+
+    if (conn && conn.open) conn.send({ type: 'payment_confirmed' });
+    else if (peerID) {
+      // Try connecting again if not yet connected
+      const mp = new Peer();
+      mp.on('open', () => {
+        const c = mp.connect(peerID);
+        c.on('open', () => c.send({ type: 'payment_confirmed' }));
+      });
+    }
+
+    const ref = 'PB-' + Math.random().toString(36).substr(2,6).toUpperCase();
+    document.getElementById('ref-no').textContent = ref;
+
+    setTimeout(() => {
+      document.getElementById('payment-form-view').classList.add('hide');
+      document.getElementById('success-view').classList.add('show');
+    }, 1200);
   }
 </script>
 </body>
