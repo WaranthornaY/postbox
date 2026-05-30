@@ -166,12 +166,16 @@
 
 <script>
   const params   = new URLSearchParams(window.location.search);
-  const peerID   = params.get('peer')  || '';
-  const price    = params.get('price') || '—';
-  const baseRate = params.get('base')  || '—';
-  const wFee     = params.get('wfee')  || '—';
-  const sFee     = params.get('sfee')  || '—';
-  const days     = params.get('days')  || '';
+  const peerID   = params.get('peer')   || '';
+  const price    = params.get('price')  || '—';
+  const baseRate = params.get('base')   || '—';
+  const wFee     = params.get('wfee')   || '—';
+  const sFee     = params.get('sfee')   || '—';
+  const days     = params.get('days')   || '';
+  const name     = params.get('name')   || '';
+  const prov     = params.get('prov')   || '';
+  const ref      = params.get('ref')    || '';
+  const region   = params.get('region') || '';
 
   document.getElementById('display-price').textContent = price;
   document.getElementById('b-base').textContent   = baseRate !== '—' ? '฿'+baseRate : '—';
@@ -184,12 +188,21 @@
     document.getElementById('delivery-val').textContent   = days;
   }
 
-  // Connect to dashboard
+  // Connect to dashboard and send package info
   let conn = null;
   if (peerID) {
     const myPeer = new Peer();
     myPeer.on('open', () => {
       conn = myPeer.connect(peerID);
+      conn.on('open', () => {
+        // Send package info to dashboard so it can show the info screen
+        conn.send({
+          type: 'package_info',
+          name, prov, region, days, price, ref,
+          tel:  params.get('tel')  || '',
+          addr: params.get('addr') || '',
+        });
+      });
     });
   }
 
