@@ -315,6 +315,15 @@
       ep: estPrice, d: days, ref,
     };
 
+    // Show price on scan screen
+    document.getElementById('scan-price').textContent = '฿' + estPrice;
+    document.getElementById('scan-breakdown').innerHTML = `
+      <div style="display:flex;justify-content:space-between;"><span>Base rate / ค่าพื้นฐาน</span><span>฿${BASE_RATE + regionFee}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span>Est. weight fee / ค่าน้ำหนัก</span><span>฿${weightFee}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span>Est. size fee / ค่าขนาด</span><span>฿${sizeFee}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;color:#1a1a2e;border-top:1px solid #e0e4ea;padding-top:4px;margin-top:2px;"><span>Estimated total / รวมโดยประมาณ</span><span style="color:#16a34a;">฿${estPrice}</span></div>
+    `;
+
     // Switch to scan view
     document.getElementById('form-view').classList.add('hide');
     document.getElementById('scan-view').classList.add('show');
