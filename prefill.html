@@ -222,27 +222,38 @@
 <div id="scan-view">
   <div class="scan-card">
     <div class="scan-title">
-      Scan the machine screen
-      <span>สแกนหน้าจอเครื่อง PostBox</span>
+      Show this QR at the machine
+      <span>แสดง QR นี้ที่เครื่อง PostBox</span>
     </div>
-    <div class="scan-instruction">
-      Point your camera at the <strong>payment QR code</strong> shown on the machine screen<br><br>
-      <span style="color:#cbd5e1">ส่องกล้องไปที่ QR Code การชำระเงิน บนหน้าจอเครื่อง</span>
-    </div>
-<div class="scan-corner sc-tr"></div>
-          <div class="scan-corner sc-bl"></div>
-          <div class="scan-corner sc-br"></div>
-          <div class="scan-line"></div>
-        </div>
+
+    <div style="width:100%;background:#f8fafc;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #e0e4ea;">
+      <div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:0.1em;color:#94a3b8;margin-bottom:2px;">ESTIMATED PRICE / ราคาโดยประมาณ</div>
+        <div style="font-size:9px;color:#cbd5e1;">Final price based on actual weight & size</div>
+        <div style="font-size:9px;color:#cbd5e1;">ราคาจริงขึ้นกับน้ำหนักและขนาดจริง</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:32px;font-weight:800;color:#16a34a;" id="scan-price">฿—</div>
+        <div style="font-size:10px;color:#94a3b8;font-weight:600;">THB</div>
       </div>
     </div>
 
+    <div id="scan-breakdown" style="width:100%;font-size:11px;color:#94a3b8;line-height:2;"></div>
+
+    <div style="background:#fff;border:3px solid #1a1a2e;border-radius:14px;padding:12px;">
+      <div id="qr-output"></div>
+    </div>
+
+    <div class="scan-instruction">
+      Hold this QR up to the <strong>camera on the machine screen</strong><br><br>
+      <span style="color:#cbd5e1">แสดง QR นี้ให้กล้องบนหน้าจอเครื่องสแกน</span>
+    </div>
   </div>
 
   <button class="back-btn" onclick="goBack()">← Back / กลับ</button>
 </div>
 
-<p class="notice" style="margin-top:8px">
+<p class="notice"<p class="notice" style="margin-top:8px">
   Data is sent directly to the machine — not stored anywhere.<br>
   <span style="color:#e2e8f0">ข้อมูลถูกส่งตรงไปยังเครื่อง ไม่มีการจัดเก็บ</span>
 </p>
