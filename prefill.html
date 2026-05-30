@@ -245,7 +245,7 @@
       <span style="color:#cbd5e1">ส่องกล้องไปที่ QR Code การชำระเงิน บนหน้าจอเครื่อง</span>
     </div>
 
-    <div id="cam-wrapper">
+    <div id="cam-wrapper" style="display:none;">
       <video id="cam-video" autoplay playsinline muted></video>
       <canvas id="cam-canvas"></canvas>
       <div class="cam-overlay">
@@ -259,7 +259,11 @@
       </div>
     </div>
 
-    <div id="cam-status">Starting camera... / กำลังเปิดกล้อง...</div>
+    <button id="start-cam-btn" class="scan-btn" onclick="startCamera()">
+      📷 &nbsp;Start Camera / เปิดกล้อง
+    </button>
+
+    <div id="cam-status" style="display:none;"></div>
   </div>
 
   <button class="back-btn" onclick="goBack()">← Back / กลับ</button>
@@ -331,7 +335,7 @@
     document.getElementById('dot1').classList.add('done');
     document.getElementById('dot2').classList.add('active');
 
-    startCamera();
+    // Camera starts when user taps the button
   }
 
   function goBack() {
@@ -341,22 +345,34 @@
     document.getElementById('dot1').classList.add('active');
     document.getElementById('dot1').classList.remove('done');
     document.getElementById('dot2').classList.remove('active');
+    // Reset camera button
+    document.getElementById('start-cam-btn').style.display = 'block';
+    document.getElementById('cam-wrapper').style.display = 'none';
+    document.getElementById('cam-status').style.display = 'none';
   }
 
   async function startCamera() {
+    // Show camera, hide button
+    document.getElementById('start-cam-btn').style.display = 'none';
+    document.getElementById('cam-wrapper').style.display = 'block';
+    document.getElementById('cam-status').style.display = 'block';
+    document.getElementById('cam-status').textContent = 'Opening camera... / กำลังเปิดกล้อง...';
+
     try {
       camStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width:640, height:480 }
       });
       const video = document.getElementById('cam-video');
       video.srcObject = camStream;
-      video.play();
+      await video.play();
       scanning = true;
       document.getElementById('cam-status').textContent = 'Ready — aim at the QR / พร้อมแล้ว ส่องที่ QR';
       document.getElementById('cam-status').className = 'ok';
       scanLoop();
     } catch (e) {
-      document.getElementById('cam-status').textContent = 'Camera unavailable / กล้องไม่พร้อม';
+      document.getElementById('cam-wrapper').style.display = 'none';
+      document.getElementById('start-cam-btn').style.display = 'block';
+      document.getElementById('cam-status').textContent = '⚠ Camera blocked — please allow camera access in browser settings / กรุณาอนุญาตการใช้กล้อง';
       document.getElementById('cam-status').className = 'err';
     }
   }
