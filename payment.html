@@ -195,9 +195,9 @@
     myPeer.on('open', () => {
       conn = myPeer.connect(peerID);
       conn.on('open', () => {
-        // Send package info to dashboard so it can show the info screen
+        // Send form data to dashboard so it shows the info screen
         conn.send({
-          type: 'package_info',
+          type: 'form_data',
           name, prov, region, days, price, ref,
           tel:  params.get('tel')  || '',
           addr: params.get('addr') || '',
@@ -216,13 +216,19 @@
     btn.disabled = true;
     spinner.style.display = 'block';
 
-    if (conn && conn.open) conn.send({ type: 'payment_confirmed' });
-    else if (peerID) {
-      // Try connecting again if not yet connected
+    const payload = {
+      type: 'payment_confirmed',
+      name, prov, region, days, price, ref,
+      tel:  params.get('tel')  || '',
+      addr: params.get('addr') || '',
+    };
+    if (conn && conn.open) {
+      conn.send(payload);
+    } else if (peerID) {
       const mp = new Peer();
       mp.on('open', () => {
         const c = mp.connect(peerID);
-        c.on('open', () => c.send({ type: 'payment_confirmed' }));
+        c.on('open', () => c.send(payload));
       });
     }
 
