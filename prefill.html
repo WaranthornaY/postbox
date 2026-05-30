@@ -6,7 +6,6 @@
 <title>PostBox — Pre-fill / กรอกข้อมูลล่วงหน้า</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -46,22 +45,7 @@
   .scan-instruction strong{color:#1a1a2e;font-weight:700;}
 
   /* Camera preview */
-  #cam-wrapper{position:relative;width:100%;max-width:300px;aspect-ratio:1;border-radius:16px;overflow:hidden;background:#1a1a2e;}
-  #cam-video{width:100%;height:100%;object-fit:cover;display:block;}
-  #cam-canvas{display:none;}
-  .cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-  .scan-frame{width:200px;height:200px;position:relative;}
-  .scan-corner{position:absolute;width:28px;height:28px;border-color:#2563eb;border-style:solid;}
-  .sc-tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
-  .sc-tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}
-  .sc-bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}
-  .sc-br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
-  .scan-line{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#2563eb,transparent);animation:scanmove 2s linear infinite;}
-  @keyframes scanmove{0%{top:0}100%{top:100%}}
 
-  #cam-status{font-size:12px;font-weight:600;color:#64748b;text-align:center;}
-  #cam-status.ok{color:#16a34a;}
-  #cam-status.err{color:#ef4444;}
 
   .scan-btn{width:100%;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:background 0.15s;}
   .scan-btn:hover{background:#1d4ed8;}
@@ -245,14 +229,7 @@
       Point your camera at the <strong>payment QR code</strong> shown on the machine screen<br><br>
       <span style="color:#cbd5e1">ส่องกล้องไปที่ QR Code การชำระเงิน บนหน้าจอเครื่อง</span>
     </div>
-
-    <div id="cam-wrapper" style="display:none;">
-      <video id="cam-video" autoplay playsinline muted></video>
-      <canvas id="cam-canvas"></canvas>
-      <div class="cam-overlay">
-        <div class="scan-frame">
-          <div class="scan-corner sc-tl"></div>
-          <div class="scan-corner sc-tr"></div>
+<div class="scan-corner sc-tr"></div>
           <div class="scan-corner sc-bl"></div>
           <div class="scan-corner sc-br"></div>
           <div class="scan-line"></div>
@@ -260,11 +237,6 @@
       </div>
     </div>
 
-    <button id="start-cam-btn" class="scan-btn" onclick="startCamera()">
-      📷 &nbsp;Start Camera / เปิดกล้อง
-    </button>
-
-    <div id="cam-status" style="display:none;"></div>
   </div>
 
   <button class="back-btn" onclick="goBack()">← Back / กลับ</button>
