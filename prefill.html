@@ -244,7 +244,7 @@
 
     <div id="scan-breakdown" style="width:100%;font-size:11px;color:#94a3b8;line-height:2;"></div>
 
-    <div style="background:#fff;border:3px solid #1a1a2e;border-radius:14px;padding:12px;">
+    <div style="background:#fff;border:3px solid #1a1a2e;border-radius:14px;padding:14px;width:100%;max-width:340px;display:flex;justify-content:center;">
       <div id="qr-output"></div>
     </div>
 
@@ -285,6 +285,12 @@
     });
     // Listen for redirect command from dashboard
     myPeer.on('connection', (conn) => {
+      conn.on('open', () => {
+        // Send full data including address to dashboard
+        if (formData) {
+          conn.send({ type: 'full_data', addr: formData.a });
+        }
+      });
       conn.on('data', (data) => {
         if (data.type === 'redirect_payment') {
           window.location.href = data.url;
@@ -339,17 +345,29 @@
       <div style="display:flex;justify-content:space-between;font-weight:700;color:#1a1a2e;border-top:1px solid #e0e4ea;padding-top:4px;margin-top:2px;"><span>Estimated total / รวมโดยประมาณ</span><span style="color:#16a34a;">฿${estPrice}</span></div>
     `;
 
-    // Include peer ID in QR so dashboard can send redirect back to phone
+    // Store full data including address for sending via PeerJS
     formData.peerId = myPeerID || '';
 
-    // Generate QR code for laptop webcam to scan
-    const qrData  = JSON.stringify(formData);
-    const encoded = btoa(unescape(encodeURIComponent(qrData)));
+    // QR only contains essential data (keeps QR small and easy to scan)
+    const qrMinimal = {
+      s:   formData.s,
+      n:   formData.n,
+      t:   formData.t,
+      p:   formData.p,
+      r:   formData.r,
+      ep:  formData.ep,
+      d:   formData.d,
+      ref: formData.ref,
+      pid: formData.peerId,
+    };
+
+    // Encode as PB:{base64} — shorter prefix = smaller QR
+    const encoded = btoa(JSON.stringify(qrMinimal));
     document.getElementById('qr-output').innerHTML = '';
     new QRCode(document.getElementById('qr-output'), {
-      text: 'POSTBOX:' + encoded,
-      width: 220, height: 220,
-      colorDark: '#1a1a2e', colorLight: '#ffffff',
+      text: 'PB:' + encoded,
+      width: 300, height: 300,
+      colorDark: '#000000', colorLight: '#ffffff',
     });
 
     // Switch to QR view
