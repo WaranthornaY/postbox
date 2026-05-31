@@ -6,7 +6,6 @@
 <title>PostBox — Pre-fill / กรอกข้อมูลล่วงหน้า</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -76,6 +75,10 @@
   <!-- Receiver -->
   <div class="card">
     <div class="section-title">Receiver Information <span>ข้อมูลผู้รับ</span></div>
+    <div class="field">
+      <label><span class="lbl-en">Sender Name</span><span class="lbl-th">ชื่อผู้ส่ง</span></label>
+      <input type="text" id="send-name" placeholder="Your full name / ชื่อผู้ส่ง">
+    </div>
     <div class="field">
       <label><span class="lbl-en">Receiver Name</span><span class="lbl-th">ชื่อผู้รับ</span></label>
       <input type="text" id="recv-name" placeholder="Full name / ชื่อ-นามสกุล">
@@ -254,7 +257,7 @@
   <button class="back-btn" onclick="goBack()">← Back / กลับ</button>
 </div>
 
-<p class="notice"<p class="notice" style="margin-top:8px">
+<p class="notice" style="margin-top:8px">
   Data is sent directly to the machine — not stored anywhere.<br>
   <span style="color:#e2e8f0">ข้อมูลถูกส่งตรงไปยังเครื่อง ไม่มีการจัดเก็บ</span>
 </p>
@@ -270,9 +273,13 @@
   let myPeerID  = null;
   let myPeer    = null;
 
+  // Match this with dashboard.html — set to null to use public PeerJS server
+  const PEER_SERVER = null;
+  // Example: const PEER_SERVER = { host: 'your-app.railway.app', port: 443, secure: true, path: '/' };
+
   // Init PeerJS on page load so we have an ID ready
   function initPeer() {
-    myPeer = new Peer();
+    myPeer = PEER_SERVER ? new Peer(PEER_SERVER) : new Peer();
     myPeer.on('open', (id) => {
       myPeerID = id;
     });
@@ -288,13 +295,14 @@
   initPeer();
 
   // Enable submit
-  ['recv-name','recv-tel','recv-address','province'].forEach(id => {
+  ['send-name','recv-name','recv-tel','recv-address','province'].forEach(id => {
     document.getElementById(id).addEventListener('input', checkReady);
     document.getElementById(id).addEventListener('change', checkReady);
   });
 
   function checkReady() {
-    const ok = document.getElementById('recv-name').value.trim() &&
+    const ok = document.getElementById('send-name').value.trim() &&
+               document.getElementById('recv-name').value.trim() &&
                document.getElementById('recv-tel').value.trim() &&
                document.getElementById('recv-address').value.trim() &&
                document.getElementById('province').value;
@@ -313,6 +321,7 @@
     const ref       = 'PB-' + Math.random().toString(36).substr(2,6).toUpperCase();
 
     formData = {
+      s: document.getElementById('send-name').value.trim(),
       n: document.getElementById('recv-name').value.trim(),
       t: document.getElementById('recv-tel').value.trim(),
       a: document.getElementById('recv-address').value.trim(),
@@ -359,14 +368,6 @@
     document.getElementById('dot2').classList.remove('active');
     document.getElementById('qr-output').innerHTML = '';
   }
-
-
-
-
-
-
-
-
 </script>
 </body>
 </html>
