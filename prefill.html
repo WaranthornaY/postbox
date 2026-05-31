@@ -345,38 +345,29 @@
       <div style="display:flex;justify-content:space-between;font-weight:700;color:#1a1a2e;border-top:1px solid #e0e4ea;padding-top:4px;margin-top:2px;"><span>Estimated total / รวมโดยประมาณ</span><span style="color:#16a34a;">฿${estPrice}</span></div>
     `;
 
-    // Store full data including address for sending via PeerJS
+    // Store peer ID in form data
     formData.peerId = myPeerID || '';
 
-    // QR only contains essential data (keeps QR small and easy to scan)
-    const qrMinimal = {
-      s:   formData.s,
-      n:   formData.n,
-      t:   formData.t,
-      p:   formData.p,
-      r:   formData.r,
-      ep:  formData.ep,
-      d:   formData.d,
-      ref: formData.ref,
-      pid: formData.peerId,
-    };
+    // QR only contains a short session ID — full data sent via PeerJS
+    // This keeps the QR simple and very easy to scan
+    const sessionID = ref; // e.g. PB-A3X9K2
 
-    // Encode as PB:{base64} — shorter prefix = smaller QR
-    const encoded = btoa(JSON.stringify(qrMinimal));
-    // Switch to QR view FIRST so div is visible before generating QR
+    // Switch to QR view FIRST so div is visible
     document.getElementById('form-view').classList.add('hide');
     document.getElementById('scan-view').classList.add('show');
     document.getElementById('dot1').classList.remove('active');
     document.getElementById('dot1').classList.add('done');
     document.getElementById('dot2').classList.add('active');
 
-    // Generate QR after view is visible
+    // Generate simple QR — just "PB:SESSION_ID:PEER_ID"
+    // Very short = very easy to scan
     document.getElementById('qr-output').innerHTML = '';
     setTimeout(() => {
       new QRCode(document.getElementById('qr-output'), {
-        text: 'PB:' + encoded,
+        text: 'PB:' + sessionID + ':' + (myPeerID || ''),
         width: 300, height: 300,
         colorDark: '#000000', colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.L,
       });
     }, 50);
   }
