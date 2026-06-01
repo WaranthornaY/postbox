@@ -273,9 +273,7 @@
   let myPeerID  = null;
   let myPeer    = null;
 
-  // Match this with dashboard.html — set to null to use public PeerJS server
   const PEER_SERVER = null;
-  // Example: const PEER_SERVER = { host: 'your-app.railway.app', port: 443, secure: true, path: '/' };
 
   // Init PeerJS on page load so we have an ID ready
   function initPeer() {
@@ -356,9 +354,19 @@
     document.getElementById('dot2').classList.add('active');
 
     function showQR() {
+      // Generate a 4-digit PIN and store it mapped to peer ID
+      // QR just contains "PB:1234" — extremely simple = very easy to scan
+      const pin = String(Math.floor(1000 + Math.random() * 9000));
+      // Store PIN → formData mapping in sessionStorage so dashboard can retrieve it
+      // We embed pin + peerID in QR: "PB:1234:peerid"
+      // But keep peerID very short by using last 8 chars only
+      const shortPeer = myPeerID.slice(-8);
+      window._postboxPIN = pin;
+      window._postboxData = formData;
+
       document.getElementById('qr-output').innerHTML = '';
       new QRCode(document.getElementById('qr-output'), {
-        text: 'PB:' + sessionID + ':' + myPeerID,
+        text: 'PB:' + pin + ':' + shortPeer,
         width: 300, height: 300,
         colorDark: '#000000', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.L,
