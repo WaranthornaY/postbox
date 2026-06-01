@@ -345,31 +345,37 @@
       <div style="display:flex;justify-content:space-between;font-weight:700;color:#1a1a2e;border-top:1px solid #e0e4ea;padding-top:4px;margin-top:2px;"><span>Estimated total / รวมโดยประมาณ</span><span style="color:#16a34a;">฿${estPrice}</span></div>
     `;
 
-    // Store peer ID in form data
     formData.peerId = myPeerID || '';
+    const sessionID = ref;
 
-    // QR only contains a short session ID — full data sent via PeerJS
-    // This keeps the QR simple and very easy to scan
-    const sessionID = ref; // e.g. PB-A3X9K2
-
-    // Switch to QR view FIRST so div is visible
+    // Switch to QR view first
     document.getElementById('form-view').classList.add('hide');
     document.getElementById('scan-view').classList.add('show');
     document.getElementById('dot1').classList.remove('active');
     document.getElementById('dot1').classList.add('done');
     document.getElementById('dot2').classList.add('active');
 
-    // Generate simple QR — just "PB:SESSION_ID:PEER_ID"
-    // Very short = very easy to scan
-    document.getElementById('qr-output').innerHTML = '';
-    setTimeout(() => {
+    function showQR() {
+      document.getElementById('qr-output').innerHTML = '';
       new QRCode(document.getElementById('qr-output'), {
-        text: 'PB:' + sessionID + ':' + (myPeerID || ''),
+        text: 'PB:' + sessionID + ':' + myPeerID,
         width: 300, height: 300,
         colorDark: '#000000', colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.L,
       });
-    }, 50);
+    }
+
+    // If peer ID is ready show QR immediately, otherwise wait for it
+    if (myPeerID) {
+      setTimeout(showQR, 50);
+    } else {
+      document.getElementById('qr-output').innerHTML = '<div style="padding:40px;color:#94a3b8;text-align:center;font-size:13px;">Connecting...<br>กำลังเชื่อมต่อ...</div>';
+      myPeer.on('open', () => {
+        myPeerID = myPeer.id;
+        formData.peerId = myPeerID;
+        showQR();
+      });
+    }
   }
 
   function goBack() {
