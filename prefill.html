@@ -6,6 +6,7 @@
 <title>PostBox — Pre-fill / กรอกข้อมูลล่วงหน้า</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -50,6 +51,7 @@
   .scan-btn{width:100%;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:background 0.15s;}
   .scan-btn:hover{background:#1d4ed8;}
 
+  @keyframes scanmove{0%{top:0}100%{top:100%}}
   .back-btn{background:transparent;border:2px solid #e0e4ea;border-radius:10px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;width:100%;}
   .back-btn:hover{border-color:#2563eb;color:#2563eb;}
 
@@ -387,12 +389,14 @@
   }
 
   function goBack() {
+    stopPhoneScan();
     document.getElementById('scan-view').classList.remove('show');
     document.getElementById('form-view').classList.remove('hide');
     document.getElementById('dot1').classList.add('active');
     document.getElementById('dot1').classList.remove('done');
     document.getElementById('dot2').classList.remove('active');
-    document.getElementById('qr-output').innerHTML = '';
+    document.getElementById('start-scan-btn').style.display = 'block';
+    setStatus('');
   }
 </script>
 </body>
