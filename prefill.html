@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PostBox — Pre-fill / กรอกข้อมูลล่วงหน้า</title>
+<title>PostBox — Send a Package</title>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -30,32 +29,39 @@
   input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;background:#fff;}
   textarea{resize:none;height:64px;line-height:1.5;}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .submit-btn{width:100%;padding:14px;background:#111;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:background 0.15s;}
-  .submit-btn:hover{background:#333;}
-  .submit-btn:disabled{background:#ccc;cursor:not-allowed;}
-
-  /* ── SCAN SCREEN ── */
-  #scan-view{display:none;width:100%;max-width:420px;flex-direction:column;align-items:center;gap:16px;}
-  #scan-view.show{display:flex;}
-  #form-view.hide{display:none;}
-
-  .scan-card{background:#fff;border-radius:16px;padding:24px 20px;width:100%;box-shadow:0 2px 20px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;gap:14px;}
-  .scan-title{text-align:center;font-size:16px;font-weight:800;color:#1a1a2e;line-height:1.4;}
-  .scan-title span{display:block;font-size:13px;font-weight:600;color:#64748b;margin-top:3px;}
-  .scan-instruction{text-align:center;font-size:12px;color:#94a3b8;line-height:1.7;max-width:300px;}
-  .scan-instruction strong{color:#1a1a2e;font-weight:700;}
-
-  /* Camera preview */
-
-
-  .scan-btn{width:100%;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:background 0.15s;}
-  .scan-btn:hover{background:#1d4ed8;}
-
-  @keyframes scanmove{0%{top:0}100%{top:100%}}
-  .back-btn{background:transparent;border:2px solid #e0e4ea;border-radius:10px;padding:10px 20px;font-family:inherit;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;width:100%;}
+  .primary-btn{width:100%;padding:14px;background:#111;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:background 0.15s;}
+  .primary-btn:hover{background:#333;}
+  .primary-btn:disabled{background:#ccc;cursor:not-allowed;}
+  .blue-btn{width:100%;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:background 0.15s;}
+  .blue-btn:hover{background:#1d4ed8;}
+  .back-btn{width:100%;padding:10px;background:transparent;border:2px solid #e0e4ea;border-radius:10px;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit;}
   .back-btn:hover{border-color:#2563eb;color:#2563eb;}
 
-  .notice{font-size:11px;color:#bbb;text-align:center;max-width:420px;line-height:1.6;}
+  #form-view.hide{display:none;}
+  #scan-view{display:none;width:100%;max-width:420px;flex-direction:column;align-items:center;gap:14px;}
+  #scan-view.show{display:flex;}
+
+  .scan-card{background:#fff;border-radius:16px;padding:22px 20px;width:100%;box-shadow:0 2px 20px rgba(0,0,0,0.07);display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .scan-title{text-align:center;font-size:16px;font-weight:800;color:#1a1a2e;line-height:1.4;}
+  .scan-title span{display:block;font-size:13px;font-weight:600;color:#64748b;margin-top:3px;}
+
+  /* camera */
+  #cam-box{position:relative;width:100%;max-width:300px;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#1a1a2e;display:none;}
+  #scan-video{width:100%;height:100%;object-fit:cover;display:block;}
+  #scan-canvas{display:none;}
+  .cam-corners{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .corner-frame{width:180px;height:180px;position:relative;}
+  .c{position:absolute;width:24px;height:24px;border-color:#2563eb;border-style:solid;}
+  .tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
+  .tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}
+  .bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}
+  .br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
+  .scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#2563eb,transparent);animation:sl 2s linear infinite;}
+  @keyframes sl{0%{top:0}100%{top:100%}}
+
+  #cam-status{font-size:12px;font-weight:600;color:#64748b;text-align:center;}
+
+  .notice{font-size:11px;color:#bbb;text-align:center;max-width:420px;line-height:1.6;margin-top:8px;}
 </style>
 </head>
 <body>
@@ -70,13 +76,10 @@
 
 <!-- ── FORM VIEW ── -->
 <div id="form-view" style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;">
-  <div>
-    <h1>Send a package <span>ส่งพัสดุ</span></h1>
-  </div>
+  <h1>Send a package <span>ส่งพัสดุ</span></h1>
 
-  <!-- Receiver -->
   <div class="card">
-    <div class="section-title">Receiver Information <span>ข้อมูลผู้รับ</span></div>
+    <div class="section-title">Sender & Receiver <span>ผู้ส่งและผู้รับ</span></div>
     <div class="field">
       <label><span class="lbl-en">Sender Name</span><span class="lbl-th">ชื่อผู้ส่ง</span></label>
       <input type="text" id="send-name" placeholder="Your full name / ชื่อผู้ส่ง">
@@ -86,7 +89,7 @@
       <input type="text" id="recv-name" placeholder="Full name / ชื่อ-นามสกุล">
     </div>
     <div class="field">
-      <label><span class="lbl-en">Phone Number</span><span class="lbl-th">เบอร์โทรศัพท์</span></label>
+      <label><span class="lbl-en">Receiver Phone</span><span class="lbl-th">เบอร์โทรผู้รับ</span></label>
       <input type="tel" id="recv-tel" placeholder="0812345678">
     </div>
     <div class="field">
@@ -95,7 +98,6 @@
     </div>
   </div>
 
-  <!-- Destination -->
   <div class="card">
     <div class="section-title">Destination <span>ปลายทาง</span></div>
     <div class="field">
@@ -193,7 +195,6 @@
     </div>
   </div>
 
-  <!-- Estimate -->
   <div class="card">
     <div class="section-title">Package Estimate <span>ประมาณการพัสดุ — เครื่องจะวัดจริงให้อัตโนมัติ</span></div>
     <div class="row">
@@ -219,8 +220,8 @@
     </div>
   </div>
 
-  <button class="submit-btn" id="submit-btn" onclick="goToScan()" disabled>
-    Next — Scan at machine / ถัดไป — สแกนที่เครื่อง
+  <button class="primary-btn" id="submit-btn" onclick="goToScan()" disabled>
+    Next / ถัดไป →
   </button>
 </div>
 
@@ -228,38 +229,56 @@
 <div id="scan-view">
   <div class="scan-card">
     <div class="scan-title">
-      Show this QR at the machine
-      <span>แสดง QR นี้ที่เครื่อง PostBox</span>
+      Scan the machine screen
+      <span>สแกนหน้าจอเครื่อง PostBox</span>
     </div>
 
-    <div style="width:100%;background:#f8fafc;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #e0e4ea;">
+    <!-- Price summary -->
+    <div style="width:100%;background:#f8fafc;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #e0e4ea;">
       <div>
-        <div style="font-size:9px;font-weight:800;letter-spacing:0.1em;color:#94a3b8;margin-bottom:2px;">ESTIMATED PRICE / ราคาโดยประมาณ</div>
-        <div style="font-size:9px;color:#cbd5e1;">Final price based on actual weight & size</div>
-        <div style="font-size:9px;color:#cbd5e1;">ราคาจริงขึ้นกับน้ำหนักและขนาดจริง</div>
+        <div style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:0.1em;">ESTIMATED PRICE / ราคาโดยประมาณ</div>
+        <div style="font-size:9px;color:#cbd5e1;margin-top:2px;">Final price based on actual weight & size</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:32px;font-weight:800;color:#16a34a;" id="scan-price">฿—</div>
-        <div style="font-size:10px;color:#94a3b8;font-weight:600;">THB</div>
+        <div style="font-size:28px;font-weight:800;color:#16a34a;" id="scan-price">฿—</div>
+        <div style="font-size:10px;color:#94a3b8;">THB</div>
       </div>
     </div>
 
     <div id="scan-breakdown" style="width:100%;font-size:11px;color:#94a3b8;line-height:2;"></div>
 
-    <div style="background:#fff;border:3px solid #1a1a2e;border-radius:14px;padding:14px;width:100%;max-width:340px;display:flex;justify-content:center;">
-      <div id="qr-output"></div>
+    <!-- Camera box (hidden until button tapped) -->
+    <div id="cam-box">
+      <video id="scan-video" autoplay playsinline muted></video>
+      <canvas id="scan-canvas"></canvas>
+      <div class="cam-corners">
+        <div class="corner-frame">
+          <div class="c tl"></div>
+          <div class="c tr"></div>
+          <div class="c bl"></div>
+          <div class="c br"></div>
+          <div class="scan-line"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="scan-instruction">
-      Hold this QR up to the <strong>camera on the machine screen</strong><br><br>
-      <span style="color:#cbd5e1">แสดง QR นี้ให้กล้องบนหน้าจอเครื่องสแกน</span>
+    <!-- Start camera button -->
+    <button class="blue-btn" id="cam-btn" onclick="startScan()">
+      📷 &nbsp;Scan Step 2 QR / สแกน QR ขั้นตอนที่ 2
+    </button>
+
+    <div id="cam-status"></div>
+
+    <div style="text-align:center;font-size:11px;color:#94a3b8;line-height:1.7;">
+      Point at the <strong style="color:#1a1a2e;">STEP 2 QR</strong> on the machine screen<br>
+      <span style="color:#cbd5e1">ส่องกล้องที่ QR ขั้นตอนที่ 2 บนหน้าจอเครื่อง</span>
     </div>
   </div>
 
   <button class="back-btn" onclick="goBack()">← Back / กลับ</button>
 </div>
 
-<p class="notice" style="margin-top:8px">
+<p class="notice">
   Data is sent directly to the machine — not stored anywhere.<br>
   <span style="color:#e2e8f0">ข้อมูลถูกส่งตรงไปยังเครื่อง ไม่มีการจัดเก็บ</span>
 </p>
@@ -271,39 +290,41 @@
   const REGION_FEES = { N:20, NE:20, C:0, E:10, S:25 };
   const DELIVERY    = { N:'2-3', NE:'2-3', C:'1', E:'1-2', S:'3-4' };
 
-  let formData = null;
-  let myPeerID  = null;
-  let myPeer    = null;
+  let formData    = null;
+  let myPeerID    = null;
+  let myPeer      = null;
+  let dashConn    = null;
+  let phoneStream = null;
+  let phoneScanning = false;
 
-  const PEER_SERVER = null;
+  // Init PeerJS
+  const myPeerObj = new Peer();
+  myPeerObj.on('open', (id) => { myPeerID = id; });
+  myPeer = myPeerObj;
 
-  // Init PeerJS on page load so we have an ID ready
-  function initPeer() {
-    myPeer = PEER_SERVER ? new Peer(PEER_SERVER) : new Peer();
-    myPeer.on('open', (id) => {
-      myPeerID = id;
+  // Listen for redirect from dashboard
+  myPeer.on('connection', (conn) => {
+    conn.on('data', (data) => {
+      if (data.type === 'redirect_payment') {
+        window.location.href = data.url;
+      }
     });
-    // Listen for redirect command from dashboard
-    myPeer.on('connection', (conn) => {
-      conn.on('open', () => {
-        // Send full data including address to dashboard
-        if (formData) {
-          conn.send({ type: 'full_data', addr: formData.a });
-        }
-      });
-      conn.on('data', (data) => {
-        if (data.type === 'redirect_payment') {
-          window.location.href = data.url;
-        }
-      });
-    });
+  });
+
+  // Check if opened with ?connect= param (phone scanned Step 2 QR)
+  const urlParams = new URLSearchParams(window.location.search);
+  const connectID = urlParams.get('connect');
+  if (connectID && formData) {
+    connectToDashboard(connectID);
   }
-  initPeer();
 
-  // Enable submit
+  // ── FORM ──────────────────────────────────────────────────────
   ['send-name','recv-name','recv-tel','recv-address','province'].forEach(id => {
-    document.getElementById(id).addEventListener('input', checkReady);
-    document.getElementById(id).addEventListener('change', checkReady);
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', checkReady);
+      el.addEventListener('change', checkReady);
+    }
   });
 
   function checkReady() {
@@ -336,67 +357,118 @@
       ep: estPrice, d: days, ref,
     };
 
-    // Show price breakdown
+    // Show price
     document.getElementById('scan-price').textContent = '฿' + estPrice;
     document.getElementById('scan-breakdown').innerHTML = `
       <div style="display:flex;justify-content:space-between;"><span>Base rate / ค่าพื้นฐาน</span><span>฿${BASE_RATE + regionFee}</span></div>
-      <div style="display:flex;justify-content:space-between;"><span>Est. weight fee / ค่าน้ำหนัก</span><span>฿${weightFee}</span></div>
-      <div style="display:flex;justify-content:space-between;"><span>Est. size fee / ค่าขนาด</span><span>฿${sizeFee}</span></div>
-      <div style="display:flex;justify-content:space-between;font-weight:700;color:#1a1a2e;border-top:1px solid #e0e4ea;padding-top:4px;margin-top:2px;"><span>Estimated total / รวมโดยประมาณ</span><span style="color:#16a34a;">฿${estPrice}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span>Weight fee / ค่าน้ำหนัก</span><span>฿${weightFee}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span>Size fee / ค่าขนาด</span><span>฿${sizeFee}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;color:#1a1a2e;border-top:1px solid #e0e4ea;padding-top:4px;margin-top:2px;"><span>Total est. / รวมโดยประมาณ</span><span style="color:#16a34a;">฿${estPrice}</span></div>
     `;
 
-    formData.peerId = myPeerID || '';
-    const sessionID = ref;
-
-    // Switch to QR view first
+    // Switch view
     document.getElementById('form-view').classList.add('hide');
     document.getElementById('scan-view').classList.add('show');
     document.getElementById('dot1').classList.remove('active');
     document.getElementById('dot1').classList.add('done');
     document.getElementById('dot2').classList.add('active');
-
-    function showQR() {
-      // Generate a 4-digit PIN and store it mapped to peer ID
-      // QR just contains "PB:1234" — extremely simple = very easy to scan
-      const pin = String(Math.floor(1000 + Math.random() * 9000));
-      // Store PIN → formData mapping in sessionStorage so dashboard can retrieve it
-      // We embed pin + peerID in QR: "PB:1234:peerid"
-      // But keep peerID very short by using last 8 chars only
-      const shortPeer = myPeerID.slice(-8);
-      window._postboxPIN = pin;
-      window._postboxData = formData;
-
-      document.getElementById('qr-output').innerHTML = '';
-      new QRCode(document.getElementById('qr-output'), {
-        text: 'PB:' + pin + ':' + shortPeer,
-        width: 300, height: 300,
-        colorDark: '#000000', colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.L,
-      });
-    }
-
-    // If peer ID is ready show QR immediately, otherwise wait for it
-    if (myPeerID) {
-      setTimeout(showQR, 50);
-    } else {
-      document.getElementById('qr-output').innerHTML = '<div style="padding:40px;color:#94a3b8;text-align:center;font-size:13px;">Connecting...<br>กำลังเชื่อมต่อ...</div>';
-      myPeer.on('open', () => {
-        myPeerID = myPeer.id;
-        formData.peerId = myPeerID;
-        showQR();
-      });
-    }
   }
 
   function goBack() {
-    stopPhoneScan();
+    stopScan();
     document.getElementById('scan-view').classList.remove('show');
     document.getElementById('form-view').classList.remove('hide');
     document.getElementById('dot1').classList.add('active');
     document.getElementById('dot1').classList.remove('done');
     document.getElementById('dot2').classList.remove('active');
-    document.getElementById('start-scan-btn').style.display = 'block';
-    setStatus('');
+    document.getElementById('cam-btn').style.display = 'block';
+    document.getElementById('cam-box').style.display = 'none';
+    document.getElementById('cam-status').textContent = '';
+  }
+
+  // ── CAMERA SCANNER ────────────────────────────────────────────
+  async function startScan() {
+    document.getElementById('cam-btn').style.display = 'none';
+    document.getElementById('cam-box').style.display = 'block';
+    document.getElementById('cam-status').textContent = 'Opening camera... / กำลังเปิดกล้อง...';
+    try {
+      phoneStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const video = document.getElementById('scan-video');
+      video.srcObject = phoneStream;
+      await video.play();
+      phoneScanning = true;
+      document.getElementById('cam-status').textContent = 'Aim at Step 2 QR / ส่องที่ QR ขั้นตอนที่ 2';
+      scanLoop();
+    } catch(e) {
+      document.getElementById('cam-status').textContent = '⚠ Camera blocked — allow camera access in browser settings';
+      document.getElementById('cam-box').style.display = 'none';
+      document.getElementById('cam-btn').style.display = 'block';
+    }
+  }
+
+  function stopScan() {
+    phoneScanning = false;
+    if (phoneStream) { phoneStream.getTracks().forEach(t => t.stop()); phoneStream = null; }
+    document.getElementById('cam-box').style.display = 'none';
+  }
+
+  function scanLoop() {
+    if (!phoneScanning) return;
+    const video  = document.getElementById('scan-video');
+    const canvas = document.getElementById('scan-canvas');
+    const ctx    = canvas.getContext('2d');
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      const img  = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+      if (code && code.data.includes('prefill.html?connect=')) {
+        phoneScanning = false;
+        stopScan();
+        try {
+          const peerID = new URL(code.data).searchParams.get('connect');
+          if (peerID) {
+            document.getElementById('cam-status').textContent = 'QR scanned! Connecting... / สแกนแล้ว กำลังเชื่อมต่อ...';
+            connectToDashboard(peerID);
+          }
+        } catch(e) {
+          document.getElementById('cam-status').textContent = 'Invalid QR — try again / ลองใหม่';
+          document.getElementById('cam-btn').style.display = 'block';
+        }
+        return;
+      }
+    }
+    requestAnimationFrame(scanLoop);
+  }
+
+  // ── CONNECT TO DASHBOARD ──────────────────────────────────────
+  function connectToDashboard(peerID) {
+    function doConnect() {
+      dashConn = myPeer.connect(peerID, { reliable: true });
+      dashConn.on('open', () => {
+        document.getElementById('cam-status').textContent = 'Connected! Sending data... / เชื่อมต่อแล้ว';
+        dashConn.send({ type: 'form_data', ...formData });
+        document.getElementById('cam-status').textContent = '✓ Sent! Waiting for payment link... / รอลิงก์ชำระเงิน...';
+      });
+      dashConn.on('data', (data) => {
+        if (data.type === 'redirect_payment') {
+          document.getElementById('cam-status').textContent = 'Redirecting to payment... / กำลังไปชำระเงิน...';
+          setTimeout(() => { window.location.href = data.url; }, 500);
+        }
+      });
+      dashConn.on('error', () => {
+        document.getElementById('cam-status').textContent = '⚠ Connection failed — scan again / สแกนใหม่';
+        document.getElementById('cam-btn').style.display = 'block';
+      });
+    }
+
+    if (myPeerID) {
+      doConnect();
+    } else {
+      document.getElementById('cam-status').textContent = 'Getting peer ID... / กำลังเตรียมการเชื่อมต่อ...';
+      myPeer.on('open', doConnect);
+    }
   }
 </script>
 </body>
