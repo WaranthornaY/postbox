@@ -298,7 +298,7 @@
   let phoneScanning = false;
 
   // Init PeerJS
-  const myPeerObj = new Peer();
+  const myPeerObj = PEER_SERVER ? new Peer(PEER_SERVER) : new Peer();
   myPeerObj.on('open', (id) => { myPeerID = id; });
   myPeer = myPeerObj;
 
@@ -445,20 +445,31 @@
   // ── CONNECT TO DASHBOARD ──────────────────────────────────────
   function connectToDashboard(peerID) {
     function doConnect() {
-      dashConn = myPeer.connect(peerID, { reliable: true });
+      document.getElementById('cam-status').textContent = 'Connecting to machine... / กำลังเชื่อมต่อเครื่อง...';
+      dashConn = myPeer.connect(peerID, { reliable: true, serialization: 'json' });
+
+      // Timeout if open doesn't fire in 8 seconds
+      const timeout = setTimeout(() => {
+        document.getElementById('cam-status').textContent = '⚠ Timeout — scan again / หมดเวลา ลองสแกนใหม่';
+        document.getElementById('cam-btn').style.display = 'block';
+      }, 8000);
+
       dashConn.on('open', () => {
-        document.getElementById('cam-status').textContent = 'Connected! Sending data... / เชื่อมต่อแล้ว';
+        clearTimeout(timeout);
+        document.getElementById('cam-status').textContent = '✓ Connected! Sending data... / เชื่อมต่อแล้ว';
         dashConn.send({ type: 'form_data', ...formData });
-        document.getElementById('cam-status').textContent = '✓ Sent! Waiting for payment link... / รอลิงก์ชำระเงิน...';
+        document.getElementById('cam-status').textContent = '✓ Done! Opening payment... / กำลังเปิดหน้าชำระเงิน...';
       });
+
       dashConn.on('data', (data) => {
         if (data.type === 'redirect_payment') {
-          document.getElementById('cam-status').textContent = 'Redirecting to payment... / กำลังไปชำระเงิน...';
-          setTimeout(() => { window.location.href = data.url; }, 500);
+          setTimeout(() => { window.location.href = data.url; }, 300);
         }
       });
-      dashConn.on('error', () => {
-        document.getElementById('cam-status').textContent = '⚠ Connection failed — scan again / สแกนใหม่';
+
+      dashConn.on('error', (err) => {
+        clearTimeout(timeout);
+        document.getElementById('cam-status').textContent = '⚠ Failed (' + err.type + ') — scan again / สแกนใหม่';
         document.getElementById('cam-btn').style.display = 'block';
       });
     }
@@ -466,8 +477,8 @@
     if (myPeerID) {
       doConnect();
     } else {
-      document.getElementById('cam-status').textContent = 'Getting peer ID... / กำลังเตรียมการเชื่อมต่อ...';
-      myPeer.on('open', doConnect);
+      document.getElementById('cam-status').textContent = 'Preparing connection... / กำลังเตรียมการเชื่อมต่อ...';
+      myPeer.once('open', doConnect);
     }
   }
 </script>
