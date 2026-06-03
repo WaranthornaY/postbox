@@ -439,8 +439,8 @@
           }
           return;
         }
-        // Show what was scanned so we can debug
-        document.getElementById('cam-status').textContent = 'Wrong QR scanned — aim at Step 2 QR / สแกน QR ขั้นตอนที่ 2';
+        // Show exactly what was scanned for debugging
+        document.getElementById('cam-status').textContent = 'Scanned: ' + raw.substring(0, 60);
       }
     }
     requestAnimationFrame(scanLoop);
