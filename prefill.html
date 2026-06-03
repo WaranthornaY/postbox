@@ -220,7 +220,7 @@
     </div>
   </div>
 
-  <button class="primary-btn" id="submit-btn" onclick="goToScan()" disabled>
+  <button class="primary-btn" id="submit-btn" onclick="goToScan()">
     Next / ถัดไป →
   </button>
 </div>
@@ -319,31 +319,9 @@
   }
 
   // ── FORM ──────────────────────────────────────────────────────
-  ['send-name','recv-name','recv-tel','recv-address','province'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('input', checkReady);
-      el.addEventListener('change', checkReady);
-      el.addEventListener('keyup', checkReady);
-      el.addEventListener('click', checkReady);
-    }
-  });
 
-  // Check on load in case fields are already filled
-  document.addEventListener('DOMContentLoaded', checkReady);
-  window.addEventListener('load', checkReady);
 
-  // Also check every second as a fallback
-  setInterval(checkReady, 500);
 
-  function checkReady() {
-    const ok = document.getElementById('send-name').value.trim() &&
-               document.getElementById('recv-name').value.trim() &&
-               document.getElementById('recv-tel').value.trim() &&
-               document.getElementById('recv-address').value.trim() &&
-               document.getElementById('province').value;
-    document.getElementById('submit-btn').disabled = !ok;
-  }
 
   function goToScan() {
     const [province, region] = document.getElementById('province').value.split('|');
