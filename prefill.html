@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PostBox — Send a Package</title>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -505,8 +505,13 @@
       });
     }
 
-    // Always wait for peer to open before connecting
-    if (myPeer.open) {
+    // Safety check
+    if (!myPeer) {
+      document.getElementById('cam-status').textContent = 'PeerJS not ready — please reload the page / โหลดหน้าใหม่';
+      document.getElementById('cam-btn').style.display = 'block';
+      return;
+    }
+    if (myPeerID) {
       doConnect();
     } else {
       document.getElementById('cam-status').textContent = 'Connecting... / กำลังเชื่อมต่อ...';
