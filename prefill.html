@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PostBox — Send a Package</title>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -298,9 +298,7 @@
   let phoneScanning = false;
 
   // Init PeerJS
-  const myPeerObj = PEER_SERVER ? new Peer(PEER_SERVER) : new Peer();
-  myPeerObj.on('open', (id) => { myPeerID = id; });
-  myPeer = myPeerObj;
+
 
   // Listen for redirect from dashboard
   myPeer.on('connection', (conn) => {
@@ -310,6 +308,35 @@
       }
     });
   });
+
+  // ── INIT PEERJS ─────────────────────────────────────────────
+  try {
+    myPeer = PEER_SERVER ? new Peer(PEER_SERVER) : new Peer();
+    console.log('PeerJS object created:', myPeer);
+
+    myPeer.on('open', (id) => {
+      myPeerID = id;
+      console.log('Phone peer ready:', id);
+    });
+
+    myPeer.on('connection', (conn) => {
+      conn.on('data', (data) => {
+        if (data.type === 'redirect_payment') {
+          window.location.href = data.url;
+        }
+      });
+    });
+
+    myPeer.on('error', (err) => {
+      console.log('PeerJS error:', err.type, err);
+      const s = document.getElementById('cam-status');
+      if (s) s.textContent = 'PeerJS error: ' + err.type;
+    });
+  } catch(e) {
+    console.error('Failed to create Peer:', e);
+    const s = document.getElementById('cam-status');
+    if (s) s.textContent = 'Failed to init: ' + e.message;
+  }
 
   // Check if opened with ?connect= param (phone scanned Step 2 QR)
   const urlParams = new URLSearchParams(window.location.search);
