@@ -324,8 +324,17 @@
     if (el) {
       el.addEventListener('input', checkReady);
       el.addEventListener('change', checkReady);
+      el.addEventListener('keyup', checkReady);
+      el.addEventListener('click', checkReady);
     }
   });
+
+  // Check on load in case fields are already filled
+  document.addEventListener('DOMContentLoaded', checkReady);
+  window.addEventListener('load', checkReady);
+
+  // Also check every second as a fallback
+  setInterval(checkReady, 500);
 
   function checkReady() {
     const ok = document.getElementById('send-name').value.trim() &&
