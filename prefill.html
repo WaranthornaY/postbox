@@ -482,7 +482,15 @@
       doConnect();
     } else {
       document.getElementById('cam-status').textContent = 'Preparing connection... / กำลังเตรียมการเชื่อมต่อ...';
-      myPeer.once('open', doConnect);
+      // Wait for peer to be ready
+      const waitForPeer = setInterval(() => {
+        if (myPeerID) {
+          clearInterval(waitForPeer);
+          doConnect();
+        }
+      }, 200);
+      // Give up after 10 seconds
+      setTimeout(() => clearInterval(waitForPeer), 10000);
     }
   }
 </script>
