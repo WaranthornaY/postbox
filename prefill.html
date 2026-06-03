@@ -410,20 +410,37 @@
       ctx.drawImage(video, 0, 0);
       const img  = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
-      if (code && code.data.includes('prefill.html?connect=')) {
-        phoneScanning = false;
-        stopScan();
-        try {
-          const peerID = new URL(code.data).searchParams.get('connect');
-          if (peerID) {
-            document.getElementById('cam-status').textContent = 'QR scanned! Connecting... / สแกนแล้ว กำลังเชื่อมต่อ...';
-            connectToDashboard(peerID);
+      if (code && code.data) {
+        const raw = code.data;
+        // Accept any QR that contains 'connect=' in any form
+        if (raw.includes('connect=') || raw.includes('connect%3D')) {
+          phoneScanning = false;
+          stopScan();
+          try {
+            // Extract peer ID — try URL parse first, then regex fallback
+            let peerID = null;
+            try {
+              peerID = new URL(raw).searchParams.get('connect');
+            } catch(e) {}
+            if (!peerID) {
+              const match = raw.match(/connect=([^&\s]+)/);
+              if (match) peerID = decodeURIComponent(match[1]);
+            }
+            if (peerID) {
+              document.getElementById('cam-status').textContent = 'QR scanned! Connecting... / สแกนแล้ว กำลังเชื่อมต่อ...';
+              connectToDashboard(peerID);
+            } else {
+              document.getElementById('cam-status').textContent = 'Could not read peer ID — try again';
+              document.getElementById('cam-btn').style.display = 'block';
+            }
+          } catch(e) {
+            document.getElementById('cam-status').textContent = 'Error: ' + e.message;
+            document.getElementById('cam-btn').style.display = 'block';
           }
-        } catch(e) {
-          document.getElementById('cam-status').textContent = 'Invalid QR — try again / ลองใหม่';
-          document.getElementById('cam-btn').style.display = 'block';
+          return;
         }
-        return;
+        // Show what was scanned so we can debug
+        document.getElementById('cam-status').textContent = 'Wrong QR scanned — aim at Step 2 QR / สแกน QR ขั้นตอนที่ 2';
       }
     }
     requestAnimationFrame(scanLoop);
