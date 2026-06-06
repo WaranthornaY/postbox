@@ -311,7 +311,7 @@
 
   // ── INIT PEERJS ─────────────────────────────────────────────
   try {
-    myPeer = PEER_SERVER ? new Peer(PEER_SERVER) : new Peer();
+    myPeer = PEER_SERVER ? new Peer(undefined, PEER_SERVER) : new Peer();
     console.log('PeerJS object created:', myPeer);
 
     myPeer.on('open', (id) => {
