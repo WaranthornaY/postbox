@@ -31,7 +31,7 @@
   .merchant-label span{display:block;font-size:9px;color:rgba(255,255,255,0.35);}
   .merchant-name{font-size:20px;font-weight:800;margin-bottom:2px;}
   .merchant-id{font-size:10px;color:rgba(255,255,255,0.4);}
-  .merchant-badge{display:inline-flex;align-items:center;gap:4px;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:20px;padding:3px 10px;font-size:10px;color:rgba(255,255,255,0.7);font-weight:600;}
+  .merchant-badge{display:inline-flex;align-items:center;gap:4px;margin-top:8px;background:rgba(255,255,255,0.1);border-radius:20px;padding:3px 10px;font-size:10px;color:rgba(255,255,255,0.7);}
 
   .amount-label{font-size:9px;font-weight:800;letter-spacing:0.12em;color:#94a3b8;margin-bottom:4px;}
   .amount-label span{display:block;font-size:9px;color:#cbd5e1;}
@@ -45,7 +45,7 @@
   .delivery-row{background:#eff6ff;border-radius:8px;padding:8px 12px;font-size:12px;color:#1565c0;font-weight:600;margin-top:4px;}
   .delivery-row span{display:block;font-size:11px;color:#93c5fd;}
 
-  #btn-pay{width:100%;padding:16px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(21,128,61,0.3);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  #btn-pay{width:100%;padding:16px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(21,128,61,0.25);transition:all 0.2s;}
   #btn-pay:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(21,128,61,0.35);}
   #btn-pay:disabled{background:#e0e0e0;color:#9e9e9e;box-shadow:none;transform:none;cursor:not-allowed;}
   .btn-label-en{display:block;}
@@ -56,7 +56,7 @@
   #success-view{display:none;flex-direction:column;align-items:center;gap:14px;padding:16px 0;text-align:center;}
   #success-view.show{display:flex;}
   #payment-form-view.hide{display:none;}
-  .success-circle{width:72px;height:72px;background:linear-gradient(135deg,#15803d,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 18px rgba(21,128,61,0.3);animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+  .success-circle{width:72px;height:72px;background:linear-gradient(135deg,#15803d,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 12px rgba(21,128,61,0.25);animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
   @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
   .success-title{font-size:20px;font-weight:800;color:#1a1a2e;}
   .success-title span{display:block;font-size:16px;font-weight:600;color:#64748b;margin-top:2px;}
@@ -206,10 +206,6 @@
     });
   }
 
-  // Countdown
-  let secs = 300;
-  // (timer bar handles visual, no separate text needed)
-
   function confirmPayment() {
     const btn     = document.getElementById('btn-pay');
     const spinner = document.getElementById('btn-spinner');
@@ -232,8 +228,8 @@
       });
     }
 
-    const ref = 'PB-' + Math.random().toString(36).substr(2,6).toUpperCase();
-    document.getElementById('ref-no').textContent = ref;
+    const refNo = 'PB-' + Math.random().toString(36).substr(2,6).toUpperCase();
+    document.getElementById('ref-no').textContent = refNo;
 
     setTimeout(() => {
       document.getElementById('payment-form-view').classList.add('hide');
