@@ -317,6 +317,7 @@
     // Generate PIN
     generatedPin = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
     document.getElementById('display-pin').textContent = generatedPin;
+    console.log('Generated PIN on phone:', generatedPin);
 
     // Switch to PIN view
     document.getElementById('form-view').classList.add('hide');
@@ -355,7 +356,7 @@
       dashConn = myPeer.connect(dashboardID, { reliable: true, serialization: 'json' });
 
       dashConn.on('open', () => {
-        // Send form data to dashboard
+        // Send form data AND PIN to dashboard
         dashConn.send({ 
           type: 'form_data', 
           s: formData.s,
@@ -369,8 +370,9 @@
           ep: formData.ep,
           d: formData.d,
           ref: formData.ref,
+          pin: generatedPin,
         });
-        console.log('Form data sent to dashboard');
+        console.log('Form data sent to dashboard with PIN:', generatedPin);
       });
 
       dashConn.on('error', (err) => {
