@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PostBox — Send a Package</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -15,6 +17,8 @@
   .step-dot{width:8px;height:8px;border-radius:50%;background:#e0e4ea;transition:background 0.3s;}
   .step-dot.active{background:#2563eb;}
   .step-dot.done{background:#16a34a;}
+  .firebase-indicator{width:8px;height:8px;border-radius:50%;background:#ccc;margin-left:8px;}
+  .firebase-indicator.connected{background:#16a34a;box-shadow:0 0 6px #16a34a;}
   h1{font-size:18px;font-weight:800;color:#111;margin-bottom:2px;}
   h1 span{display:block;font-size:14px;font-weight:600;color:#666;margin-top:2px;}
   .card{background:#fff;border-radius:16px;padding:22px 20px;width:100%;max-width:420px;box-shadow:0 2px 20px rgba(0,0,0,0.07);margin-bottom:12px;}
@@ -52,6 +56,11 @@
   .success-banner{display:none;background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:16px;text-align:center;margin-bottom:12px;}
   .success-banner.show{display:block;}
   .success-banner strong{color:#16a34a;}
+
+  .sync-status{font-size:11px;color:#94a3b8;text-align:center;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .sync-dot{width:6px;height:6px;border-radius:50%;background:#ccc;}
+  .sync-dot.synced{background:#16a34a;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
 </style>
 </head>
 <body>
@@ -61,6 +70,7 @@
   <div class="step-indicator">
     <div class="step-dot active" id="dot1"></div>
     <div class="step-dot" id="dot2"></div>
+    <div class="firebase-indicator" id="firebase-status"></div>
   </div>
 </div>
 
@@ -238,6 +248,11 @@
       <span style="color:#cbd5e1;">จดหรือจำ PIN 4 หลักนี้ให้ไว้</span><br>
       <span style="color:#cbd5e1;">กรอก PIN นี้บนหน้าจอเครื่องเพื่อยืนยันและดำเนินการต่อ</span>
     </div>
+
+    <div class="sync-status" id="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span>Syncing to machine...</span>
+    </div>
   </div>
 
   <button class="back-btn" onclick="goBack()">← Back / กลับ</button>
@@ -249,6 +264,23 @@
 </p>
 
 <script>
+  // ── FIREBASE CONFIG ──────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyC1DIVyAuVTaU7EAIgNBLwzQfdkuTgx4mc",
+    authDomain: "postbox-464b3.firebaseapp.com",
+    databaseURL: "https://postbox-464b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "postbox-464b3",
+    storageBucket: "postbox-464b3.firebasestorage.app",
+    messagingSenderId: "693033912315",
+    appId: "1:693033912315:web:e7b03f893a90070de1ad5e",
+    measurementId: "G-E0WKPHR8W3"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  let dbRef = null;
+
   const BASE_RATE   = 30;
   const WEIGHT_RATE = 0.05;
   const SIZE_FEES   = { S:0, M:20, L:50, XL:80 };
@@ -261,28 +293,82 @@
   let dashConn    = null;
   let generatedPin = '';
 
-  // PEERJS SERVER CONFIG
   const PEER_SERVER = { host: 'postbox-peer.onrender.com', port: 443, secure: true, path: '/' };
 
-  // ── INIT PEERJS ─────────────────────────────────────────────────────
+  // ── INITIALIZE FIREBASE ──────────────────────────────────────────
+  function initFirebase() {
+    console.log('✓ Firebase initialized');
+    
+    // Update Firebase connection status
+    db.ref('.info/connected').on('value', (snapshot) => {
+      const connected = snapshot.val();
+      const statusEl = document.getElementById('firebase-status');
+      if (statusEl) {
+        statusEl.className = connected ? 'firebase-indicator connected' : 'firebase-indicator';
+        console.log('Firebase connected:', connected);
+      }
+    });
+
+    // Listen for redirect messages from dashboard
+    const phoneID = 'phone_' + Math.random().toString(36).substr(2, 8);
+    dbRef = db.ref(`phones/${phoneID}`);
+    
+    dbRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.redirect_url) {
+        console.log('✓ Received redirect from dashboard');
+        updateSyncStatus('✓ Synced!');
+        setTimeout(() => {
+          window.location.href = data.redirect_url;
+        }, 1500);
+      }
+    });
+  }
+
+  // ── SEND FORM TO FIREBASE ────────────────────────────────────────
+  function sendFormToFirebase(data) {
+    if (!dbRef) return;
+    
+    const formRef = db.ref(`forms/${data.ref}`);
+    formRef.set({
+      ...data,
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      status: 'pending'
+    }).then(() => {
+      console.log('✓ Form sent to Firebase:', data.ref);
+    }).catch(err => {
+      console.error('❌ Error sending form:', err);
+    });
+  }
+
+  // ── UPDATE SYNC STATUS ───────────────────────────────────────────
+  function updateSyncStatus(message) {
+    const statusEl = document.getElementById('sync-status');
+    const dotEl = document.getElementById('sync-dot');
+    if (statusEl) {
+      statusEl.innerHTML = `<div class="sync-dot synced"></div><span>${message}</span>`;
+    }
+  }
+
+  // ── INIT PEERJS ──────────────────────────────────────────────────
   function initPeer() {
     try {
       myPeer = PEER_SERVER ? new Peer(undefined, PEER_SERVER) : new Peer();
 
       myPeer.on('open', (id) => {
         myPeerID = id;
-        console.log('Phone peer ready:', id);
+        console.log('✓ Phone peer ready:', id);
       });
 
       myPeer.on('error', (err) => {
-        console.log('PeerJS error:', err.type, err);
+        console.log('PeerJS error:', err.type);
       });
     } catch(e) {
       console.error('Failed to create Peer:', e);
     }
   }
 
-  // ── FORM SUBMISSION ──────────────────────────────────────────────────
+  // ── FORM SUBMISSION ──────────────────────────────────────────────
   function submitForm() {
     const province = document.getElementById('province').value;
     if (!province) {
@@ -316,8 +402,11 @@
 
     // Generate PIN
     generatedPin = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+    console.log('✓ PIN generated:', generatedPin);
     document.getElementById('display-pin').textContent = generatedPin;
-    console.log('Generated PIN on phone:', generatedPin);
+
+    // Send to Firebase
+    sendFormToFirebase({ ...formData, pin: generatedPin });
 
     // Switch to PIN view
     document.getElementById('form-view').classList.add('hide');
@@ -326,38 +415,37 @@
     document.getElementById('dot1').classList.add('done');
     document.getElementById('dot2').classList.add('active');
 
-    // Send form data to dashboard via PeerJS
+    updateSyncStatus('📡 Syncing to machine...');
+
+    // Send to dashboard via PeerJS if connected
     connectAndSendData();
   }
 
-  // ── CONNECT AND SEND DATA ────────────────────────────────────────────
+  // ── CONNECT AND SEND DATA ────────────────────────────────────────
   function connectAndSendData() {
-    // Check if we already have a dashboard connection parameter
     const urlParams = new URLSearchParams(window.location.search);
     const dashboardID = urlParams.get('connect');
 
     if (dashboardID) {
-      // We were opened via the "connect" parameter from dashboard
       connectToDashboard(dashboardID);
     } else {
-      // User scanned prefill QR - they'll scan the PIN QR next (no longer used)
-      console.log('Waiting for dashboard connection...');
+      console.log('No dashboard connection parameter');
     }
   }
 
-  // ── CONNECT TO DASHBOARD ──────────────────────────────────────────────
-  function connectToDashboard(dashboardID) {
+  // ── CONNECT TO DASHBOARD ──────────────────────────────────────────
+  function connectToDashboard(id) {
     if (!myPeer) {
       console.error('PeerJS not initialized');
       return;
     }
 
     function doConnect() {
-      dashConn = myPeer.connect(dashboardID, { reliable: true, serialization: 'json' });
+      dashConn = myPeer.connect(id, { reliable: true, serialization: 'json' });
 
       dashConn.on('open', () => {
-        // Send form data AND PIN to dashboard
-        dashConn.send({ 
+        console.log('✓ Connected to dashboard via PeerJS');
+        const payload = {
           type: 'form_data', 
           s: formData.s,
           n: formData.n,
@@ -371,28 +459,39 @@
           d: formData.d,
           ref: formData.ref,
           pin: generatedPin,
-        });
-        console.log('Form data sent to dashboard with PIN:', generatedPin);
+        };
+        dashConn.send(payload);
+        console.log('✓ Form data sent to dashboard via PeerJS');
+        updateSyncStatus('✓ Sent to machine!');
       });
 
       dashConn.on('error', (err) => {
         console.error('Dashboard connection error:', err);
+        updateSyncStatus('⚠ Connection issue');
       });
 
       dashConn.on('close', () => {
         console.log('Dashboard connection closed');
+      });
+
+      dashConn.on('data', (data) => {
+        console.log('Received from dashboard:', data);
+        if (data.type === 'redirect_payment') {
+          console.log('✓ Redirecting to payment...');
+          updateSyncStatus('✓ Opening payment...');
+          window.location.href = data.url;
+        }
       });
     }
 
     if (myPeerID) {
       doConnect();
     } else {
-      // Wait for peer to open
       myPeer.on('open', doConnect);
     }
   }
 
-  // ── GO BACK ──────────────────────────────────────────────────────────
+  // ── GO BACK ──────────────────────────────────────────────────────
   function goBack() {
     document.getElementById('pin-view').classList.remove('show');
     document.getElementById('form-view').classList.remove('hide');
@@ -405,6 +504,7 @@
 
   // Initialize on load
   window.addEventListener('load', () => {
+    initFirebase();
     initPeer();
   });
 </script>
